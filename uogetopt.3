@@ -1,0 +1,495 @@
+.TH uogetopt 3
+.SH NAME
+uogetopt \- GNU getopt clone with extented functionality
+.SH SYNTAX
+.B #include "uogetopt.h"
+.RS
+.nf
+typedef struct {
+    char shortname;
+    const char *longname;
+    int argtype; /* 0 or 1 no argument, set (*arg) from val. */
+    void *var; /* mandatory */
+    int val; /* val for *var in case of type 0 or 1 */
+    const char *help;
+    const char *paraname;
+} uogetopt_t;
+.fi
+.RE
+.sp
+.BI "void uogetopt(const char *prog, const char *package, const char *version, "
+.br
+.BI "     int *argc, char **argv,"
+.br
+.BI "     void (*out)(int iserr,const char *),"
+.br
+.BI "     const char *head,uogetopt_t *,const char *tail);"
+.br 
+.br 
+.BI "void uogetopt_out (int iserr,const char *s);"
+
+.SH DESCRIPTION
+The 
+.B uogetopt
+function handles the options included in the 
+argument/option vector described by the
+.I argc
+and 
+.I argv
+arguments to 
+.BR uogetopt .
+It provides support for the
+.IR "--help" ,
+.IR "--longhelp" 
+and
+.I "--version"
+options described below, see "IMPLICIT OPTIONS".
+
+Options are described by the type
+.B "uogetopt_t"
+which is described in the section named
+.IR "STRUCT UOGETOPT" . 
+.B uogetopt
+manages the assignment of commandline option or flag values to program variables.
+It includes direct support for the most often used option data types (flags, strings
+and long numbers), and supports other data types through callback functions.
+
+.B uogetopt 
+handles 
+.B all
+options. If it detects an error it will exit (this is also true in case an implicit
+option is used). 
+
+If the environment variable
+.I POSIXLY_CORRECT
+is set 
+.B uogetopt 
+will stop at the first non-option argument and reorder the 
+.I argv
+array to begin at that argument (and update *argc). Otherwise
+.B uogetopt 
+will scan the whole 
+.I argv 
+array for options and will return only non-options in the argv
+array.
+
+.B uogetopt
+will reorder the 
+.I argv array 
+and change 
+.IR *argc ,
+but will not change the strings in the array. If 
+.I argv
+members are dynamically allocated you should possibly make sure you have some
+other points to them to be able to free them again (be sure to understand how
+the 
+.B UOGO_STRING
+type works before you do that).
+
+.SS "Description of the arguments for uogetopt"
+.TP
+.B "const char *prog"
+is mandatory and contains the name of the program, to be used in version
+strings (the --version and --help style options) and possibly for the
+usage line of the help output (see the 
+.I "head"
+variable, below).
+.TP
+.B "const char *package"
+is optional and holds the name of the package the programm belongs to. If it's
+given then the version strings will look like this:
+.br
+.EX
+  lrz (lrzsz) 0.12.20
+.EE
+.br
+otherwise the will look like this:
+.br
+.EX
+  lrz 0.12.20
+.EE
+
+.TP
+.B "const char *version"
+is mandatory and contains the version number of the program, to be used in version
+strings (the --version and --help style options).
+
+.TP
+.B "int *argc"
+must contain the number of arguments 
+.B "argv"
+contains, and will after return of the 
+.B uogetopt
+function contain the number of arguments left in the new array.
+.TP
+.B "char **argv"
+is the argument array.
+.TP
+.B "void (*out)(int iserr,const char *)"
+is the function called by 
+.B uogetopt 
+to print the output texts (help, version or errors). If this argument is
+.I NULL
+then an crude internal function be used (uogetopt_out), which simply sends
+the text to the standard or standard error output.
+.TP
+.B "const char *head"
+is optional. If given it should contain the first lines of help text output.
+Otherwise 
+.B "usage: PROG [options]"
+will be printed, where PROG is the string given as the 
+.B "prog" 
+argument, see above.
+.TP 
+.B "uogetopt_t *" 
+is an array 
+and describes the options the program recognizes. It's described in detail below.
+.TP
+.B "const char *tail"
+is optional. If given it should contain the last lines of help text output, to be
+printed after the option have been described.
+
+.SH "UOGETOPT_T"
+A uogetopt_t describes a single option, and contains
+the following members:
+
+.TP 
+.B "char shortname"
+is the short, one charater, form of the option. 
+.I '\\0' 
+means it does not have this.
+.TP
+.B "const char *longname"
+is a long option, without leading dashes. 
+.I NULL
+tells the function that this option does not have a long form.
+.TP
+.B "int argtype"
+describes the type of the variable to hold the option in. See 
+.IR "VARIABLE TYPES" ,
+below.
+.TP
+.B "void *var"
+points to a place to store the option value into. 
+.TP
+.B "int val"
+will be used as a value for options with flag character.
+.TP
+.B "const char *help"
+is the help text for this option. See 
+.IR "HELP TEXTS" ,
+below.
+.TP
+.B "const char *paraname"
+is a name for the parameter, to be used in the help text.
+
+.SH "VARIABLE TYPES"
+The 
+.I argtype 
+member of the uogetopt_t structure describes the type of an argument. 
+The are 6 possible variable types now:
+.TP
+.B "UOGO_FLAG"
+is a simple flag. The value of the 
+.I "val" 
+member will be stored into the 
+.I "var" 
+member, which has to point to an integer type variable (int). Use it like this:
+.EX
+.nf
+int yesno=-1;
+[other code]
+{'y',"yes", UOGO_FLAG,&yesno,1,"`yes' help text",0},
+{'n',"no",  UOGO_FLAG,&yesno,0,"`no' help text",0},
+.fi
+.EE
+.TP
+.B "UOGO_FLAGOR"
+is like UOGO_FLAG, except that does not overwrite the memory 
+.I "var" 
+points to, but 
+.I ORs 
+the
+.I "val"
+into that.
+.TP
+.B "UOGO_STRING"
+stores the address of the option value string in the memory
+.I "var"
+points to. 
+.I "val"
+is unused in the case. Please note that the memory for the string 
+is not dynamically allocated. Therefore it's unsafe to change the
+.I "char **argv"
+array given to the uogetopt function. Use it like this:
+.EX
+.nf
+char *inputfilename;
+[other stuff]
+{'i',"input", UOGO_STRING,&inputfilename,0,
+ "Name of the input file","FILENAME"},
+.fi
+.EE
+
+.TP
+.B "UOGO_ULONG"
+converts the option value into an unsigned long and stores it into
+the memory 
+.I "var" 
+points to (which should be of type 
+.IR "unsigned long" ).
+
+The options value may be written in hexadecimal (0x...), octal
+(0755) or plain decimal. Use it like this:
+
+.EX
+.nf
+unsigned long ul;
+[other stuff]
+{'m',"maxsize", UOGO_ULONG,&ul,0,
+ "Maximal size of something","BYTES"},
+.fi
+.EE
+
+The 
+.I "val" 
+member is ignored.
+
+.TP
+.B "UOGO_LONG"
+is almost identical to the 
+.I "UOGO_ULONG"
+type except that it handles signed longs.
+
+.TP 
+.B "UOGO_CALLBACK"
+is used for other data types or special things. If the 
+.I uogetopt 
+functions happens to meet such an option it calls the callback function to handle the value.
+This is of course meant to be the primary way to extend the uogetopt datatypes.
+Use it like this:
+.EX
+.nf
+int from;
+int to;
+
+/* error checking omitted */
+static int 
+handle_range(uogetopt_t *opt, const char *val)
+{
+    const char *colon=strchr(val,':');
+    if (!colon) {
+        from=INT_MIN;
+        to=(int)strtol(val,NULL,0);
+    } else {
+        from=(int)strtol(val,NULL,0);
+        if (!colon[1])
+          to=INT_MAX;
+        else
+          to=(int)strtol(colon+1,NULL,0);
+    }
+    return 0; /* ok */
+}
+[other stuff]
+{'l',"loop-boundaries", UOGO_CALLBACK,handle_range,0,
+ "Boundaries of the loop in FROM:TO notation","RANGE"},
+.fi
+.EE
+.TP 
+.B "UOGO_PRINT"
+just print the help text if this option occurs (this
+can be used for e.g. copyright options).
+.TP 
+.B "UOGO_HIDDEN"
+This is not really a type, but a value to be ORed with the
+type, and make uogetopt not print this option in --help or --longhelp lists
+(this may be useful for maintainer mode options).
+.EX
+.nf
+int risky=0;
+#define PACKAGE "my package"
+[other code]
+{ 0 ,"buggy-new-option", UOGO_FLAG|UOGO_HIDDEN,&risky,1,"`yes' help text",0},
+{ 0 ,"copyright", UOGO_PRINT|UOGO_HIDDEN,0,0,
+  "Copyright (C) 1999 Uwe Ohse\\n"
+  PACKAGE " comes with NO WARRANTY,\\n"
+  "to the extent permitted by law.\\n"
+  "You may redistribute copies of " PACKAGE "\\n"
+  "under the terms of the GNU General Public License.\\n"
+  "For more information about these matters,\\n"
+  "see the files named COPYING.\\n",0},
+.fi
+.EE
+(the --copyright option is used by the --version stuff. It's not needed to 
+print it's output in every --longhelp text, so i marked it as hidden.)
+.SH "HELP TEXTS"
+One of the more important reasons to write uogetopt was to get better
+support for help texts. I often forgot to update the help texts when
+i changed or added some option (of course even more often i forgot to
+update the manual, but i didn't see a good way for a getopt function to
+fix that...).
+
+The first thing printed is the
+
+.SS "help text header"
+The 
+.B head
+argument to the 
+.B uogetopt 
+function will be printed at the top of the help text. If this has
+been omitted then
+.B "usage: PROG [options]"
+will be printed. 
+
+Then follows, after an empty line, the
+.SS "help texts for options"
+which is taken from the options description given to the
+uogetopt function, it's the 
+.B help 
+member of the 
+.I "uogetopt_t"
+variable.
+In it's basic form is a single string, without a line feed in it. This will
+be printed upon request for the long or short help text of an option.
+Longer help texts are possible. Multiple lines must be separated by line feeds.
+The first line is used for short and long help texts, the following lines are
+used for long help only. 
+
+In the long help text is requested the full text will be printed with correct
+indentation. An additional line feed is printed after every long help text
+(this makes it easy to include empty lines in the output which serve as 
+separators).
+
+The 
+.B paraname
+member of the uogetopt_t is optional, but should contain a name for the
+parameter. If it's missing 
+.B uogetopt
+will just print a name for the variable type.
+
+Examples:
+.br
+.nf
+   {'i',"input", UOGO_STRING,&inputfilename,0,
+    "Name of the input file\\n"
+    "This file should probably better exist.\\n"
+    "If this option is omitted then stdin will be used","FILENAME"},
+   {'o',"output", UOGO_STRING,&outputfilename,0,
+    "Name of the output file\\n"
+    "If this option is omitted then stdout will be used\\n","NULL"},
+   {'u',"user", UOGO_STRING,&username,0,
+    "Name of the user\\n","USERNAME"},
+   {'x',"exit", UOGO_FLAG,&exit_flag,0,
+    "Exit without doing anything","FILENAME"},
+.fi
+.br
+results in the following output for
+.BR --help :
+.br
+.nf
+     -i, --input=FILENAME       Name of the input file
+     -o, --output=STRING        Name of the output file
+     -u, --user=USERNAME        Name of the user
+     -x, --exit                 Exit without doing anything
+.fi
+.br
+and in the following output for
+.BR --longhelp :
+.br
+.nf
+     -i, --input=FILENAME       Name of the input file
+                                This file should probably better exist.
+                                If this option is omitted then stdin will be used
+     -o, --output=STRING        Name of the output file
+                                If this option is omitted then stdout will be used
+
+     -u, --user=USERNAME        Name of the user
+     -x, --exit                 Exit without doing anything
+.fi
+.br
+
+The last part of the help text is the
+.SS "help text footer"
+which is either empty (NULL) or contains some text which will be printed
+unindented.
+
+.SS "long help for single options"
+If --help or --longhelp options are used to see the help text for a single
+option the long help will be printed as described above, but without any
+header or trailer.
+
+.SS "version help"
+The --version option will print version and, optionally, copyright information, 
+which will be taken from the help text of the 
+.B --copyright 
+option, in case you provided that.
+
+.SH "IMPLICIT OPTIONS"
+.I uogetopt
+implements some options by itself. These are:
+.TP
+.B "\-\-uogetopt-paranoid"
+Print a help text as if the 
+.B "--longhelp" 
+options would have been given instead, but prints out a warning if the
+help text does not fit on 80 character wide screens. This is not
+implemented very sophisticated.
+.TP
+.B "\-\-help [OPTION]"
+Print the first line of the help text of all options, or the
+long help for the named option 
+.IR OPTION ,
+which may be given as a short or long option with or without
+leading dashes.
+.TP
+.B "\-\-longhelp [OPTION]"
+Shows longer help text for all or one option. 
+.B "\-\-longhelp"
+without an argument shows the long help for this
+option, without arguments it shows the long description
+for all options.
+.TP
+.B "\-\-version"
+prints version information, consisting of the
+.IR "prog" ,
+.IR "package" and
+.I "version" 
+information provided to uogetopt function. It also prints
+copyright information if available.
+.TP
+.B "implicit short options"
+If 
+.I uogetopt
+sees a 
+.B "\-h" 
+or
+.B "\-?"
+option and the character is not already handled by a short option
+then 
+.i uogetopt
+will treat that option like
+.BR "\-\-help" .
+Likewise 
+.B "\-v" 
+or 
+.B "\-V" 
+will be mapped to 
+.BR "\-\-version" . 
+These mappings do 
+.B not
+occur if the short option is already in use.
+
+
+.SH ERROR HANDLING
+uogetopt() will exit upon errors.  Of course this could be changed.
+
+.SH COPYRIGHT
+Copyright 1998,1999 Uwe Ohse.
+.br
+This routines are published under the GNU
+General Public License,
+see
+.IR COPYING 
+for a full statement of rights and permissions.
+.SH AUTHOR
+Uwe Ohse

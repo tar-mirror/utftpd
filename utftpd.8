@@ -1,0 +1,207 @@
+.TH utftpd 8
+.SH NAME
+utftpd \- a trivial file transfer protocol (TFTP) server
+.SH SYNOPSIS
+.B utftp
+[\fIoptions\fR] [\fIdirs\fR]
+.SH DESCRIPTION
+.B utftpd 
+sends and receives files with the TFTP protocol. It is normally started from inetd.
+
+TFTP doesn't support authentication, so the only way to authenticate
+TFTP clients is by using IP addresses.
+
+.TP 
+.B "traditional TFTP access control"
+In traditional mode 
+.I utftpd 
+will allow access to files in all directories (and subdirectories of
+those) named one the command line. Read access will be allowed for all
+publicly readable files and write access to already existing and publicy
+writable files. 
+Unlike other TFTP servers 
+.I utftpd
+will deny all access if no directories have been specified on the command
+line. If you wish to sacrifice all security you can still specify a
+single slash character.
+
+.TP 
+.B "traditional mode access control summary"
+This means that every host which can talk to the TFTP server can read
+and write all those files, and of course every user on that hosts can
+do that, too. Therefore you should protect those TFTP servers with
+.I tcpd
+or a packet filter.
+
+There is no client-specific access control in this mode: all clients
+get the same rights.
+
+.TP 
+.B "relative filenames in traditional mode"
+are allowed for read accesses only. If 
+.I utftpd
+sees a relative file name it qualifies it with a eventual value of the
+.I "--global-chdir" 
+option, if any, and then tries to find the file in any of the directories
+named on the command line. It will stop at the first file. If that happens
+to be unreadable it will deny access.
+
+.TP 
+.B "extended access control"
+.I utftpd
+also offers a more elaborate access control scheme, which will be used
+if the 
+.I "--config-file" option is given, and which allows to assign rights
+to read, create or overwrite files or files in directories for every
+single client. It also allows version control.
+
+Details may be found in in the
+.I "utftpd.conf" 
+and
+.I "utftpd_make" 
+manual pages.
+
+
+.SH OPTIONS
+.TP
+.B "\-c, \-\-config-file FILE" 
+Use
+.B FILE
+as configuration file. This has to be a 
+.I cdb
+database file. See the 
+.I utftpd_make
+manual page for how to generate this file,
+and the 
+.I utftpd.conf.5
+manual page more information about the input file format of utftpd_make.
+This file may reside outside the 
+chroot()ed area (this also means the filename should be relative to
+the real root directory).
+
+If this option is missing utftpd will fall back to 
+.IR "old style compatibility" ,
+see above.
+
+.TP
+.B "\-C, \-\-global-chroot DIR"
+utftpd shall change its working directory to DIR, and 
+invoke 
+.I chroot(".") 
+magic after that. This will be done 
+.B before
+the configuration file is read.
+
+.TP
+.B "\-d, \-\-global-chdir DIR"
+utftpd shall change its working directory to DIR. This 
+is done after a 
+.I "global chroot"
+(see the 
+.I \-C
+option above).
+
+.TP
+.B "\-u, \-\-global-uid NAME_OR_NUMBER"
+utftpd shall change its user ID to NAME_OR_NUMBER, which
+may be a number or a name. In case of a name it will be
+resolved at the start of utftpd. The change to the new
+user id will be done after a possible global chroot.
+
+You may specify a group as well: Use the 
+.I USER.GROUP
+form for that (or leave out the 
+.I USER
+to change only the group).
+ 
+.TP
+.B "\-v, \-\-verbose"
+Be verbose (to syslog).
+
+.PP
+In case i screwed something up:
+short options use the same arguments as the long ones
+
+.SH "ORDER"
+.B utftpd
+will, upon startup, in that order:
+
+.B "receive the first packet"
+from remote (it needs the address of the peer, to find his data
+in the configuration file). [just for the records: it can't use
+MSG_PEEK here because that would make inetd dance wild. Uah.]
+This needs to be done here and now simply because this packet
+has to be read, else awful things happen if utftpd exits before
+it reads the first packet.
+
+.B "open a syslog connection"
+
+.BR "open the configuration file" ,
+so it may reside outside the chrooted() area
+(see the \-\-config-file option). This step is not done in 
+traditional mode.
+
+.B "resolve user / group names"
+from a 
+.I \-\-global-uid
+option.
+
+.B "chdir and then chroot"
+to the 
+.I \-\-global-chroot
+directory, if given.
+
+.B "change user/group IDs"
+to the 
+.I \-\-global-uid 
+values, if any.
+
+.B "chdir to the" 
+.I \-\-global-chdir
+directory, if given.
+
+.B "read the configuration file"
+see the \-\-config-file option. This step is only done if a configuration file
+has been given on the command line.
+
+.B "close the configuration file"
+This step is only done if a configuration file
+has been given on the command line.
+
+.B "go to daemon mode: fork itself in the background"
+
+.SH "VERSION CONTROL"
+.I "utftpd"
+knows about version control. If it's activated in the configuration file
+and the requested file has been put under version control (which you have to do
+yourself) then utftpd will
+
+.I "on GET requests (RRQ)"
+try to check out the latest revision and send that. It will never care about
+checked out copies it finds lying around.
+
+.I "on PUT requests (WRQ)"
+out an editable copy, receive the file and then check them in. It will
+deny access if the checkout fails.  This behaviour allows you to manually
+check out a file,
+edit it, check it in again, without having to fear that utftpd overwrites
+the file you are editing, and is also the right way to not open a race
+condition (think of two clients wanting to write the same file, although
+this is a stupid thing to do anyway).
+
+SCCS is preferred over RCS.
+
+It's a usually not a bright idea to put binary files under revision
+control: VC systems tend to dislike them. Some implementations may
+be ok, so GNU RCS seems to work find, provided it also has GNU diff
+available.
+
+Version control support is not available in traditional access control
+mode.
+
+.SH "SEE ALSO"
+utftpd_make(8),
+utftpd.conf(5),
+RFC 1350, 
+RFC 2348,
+RFC 2349.

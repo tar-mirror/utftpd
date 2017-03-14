@@ -1,0 +1,833 @@
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+#noinst_SCRIPTS=systype
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = .
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+CC = @CC@
+CPP = @CPP@
+MAKE = @MAKE@
+MAKEINFO = @MAKEINFO@
+PACKAGE = @PACKAGE@
+RANLIB = @RANLIB@
+RCS_CI = @RCS_CI@
+RCS_CO = @RCS_CO@
+SCCS_CLEAN = @SCCS_CLEAN@
+SCCS_DELTA = @SCCS_DELTA@
+SCCS_GET = @SCCS_GET@
+SCCS_UNGET = @SCCS_UNGET@
+TFTP = @TFTP@
+U = @U@
+VERSION = @VERSION@
+YACC = @YACC@
+
+PACKAGE_VERSION = @PACKAGE@-@VERSION@
+# i can do that better ...
+AUTOMAKE_OPTIONS = no-dependencies ansi2knr readme-alpha 1.3 gnu
+man_MANS = utftpd.8 utftpd_make.8 utftpd.conf.5 utftp.1
+noinst_HEADERS = timselsysdep.h nonblock.h uocompiler.h str2num.h uostr.h 	attribs.h uoio.h cdb.h typesize.h cdbmake.h uogetopt.h str_ulong.h  	wildmat.h tftplib.h timing.h utftpd_make.h uosock.h no_tftp.h 	utftpd.h
+
+TESTS = check.1 check.2 check.3 check.4 check.5 check.6 check.7 check.8 	check.9 check.10 check.11 check.12 check.13 check.14 check.15 check.16 	check.17 check.18 check.19 check.20 check.21 check.22 check.23 check.24 	check.25 check.26 check.27 check.28 check.29 check.30 check.31 check.32 	check.33 check.34 check.35 check.36 check.37 check.38 check.39 check.40 	check.41 check.42 check.43 check.44 check.cleanup
+
+TESTS_ENVIRONMENT = TFTP=@TFTP@ 	SCCS_GET=@SCCS_GET@ SCCS_DELTA=@SCCS_DELTA@ SCCS_CLEAN=@SCCS_CLEAN@ SCCS_UNGET=@SCCS_UNGET@ 	RCS_CI=@RCS_CI@ RCS_CO=@RCS_CO@
+
+EXTRA_DIST = inet_aton.c memcmp.c 	Specfile.in rpmrc buildrpm systype.in 	$(man_MANS) uostr.3 uogetopt.3 	$(TESTS) check_lib check_extra.1 	README README.cvs TODO sample.config USAGE FEATURES
+
+MOSTLYCLEANFILES = check..*
+
+noinst_LIBRARIES = libstr.a libio.a libcdb.a libcdbmake.a libtftp.a
+libstr_a_SOURCES = uostr.c uostr_cstr.c uostr_uostr.c uostr_cut.c uostr_mem.c uostr_char.c
+libio_a_SOURCES = uoio.c uoio_gd_uos.c
+libcdb_a_SOURCES = cdb_seek.c cdb_hash.c cdb_unpack.c
+libcdbmake_a_SOURCES = cdbmake_add.c   cdbmake_hash.c  cdbmake_pack.c
+libtftp_a_SOURCES = tftp_nak.c tftp_s_ctrl.c tftp_send.c tftp_receive.c tftp_prepare.c tftp_f_ctrl.c
+
+noinst_PROGRAMS = miniudpserv
+sbin_PROGRAMS = utftpd utftpd_make utftpd_dump
+bin_PROGRAMS = utftp
+utftpd_SOURCES = utftpd.c uogetopt.c str2long.c str2ulong.c nonblock.c 	wildmat.c utftpd_recv.c str_ulong.c utftpd_send.c 	utftpd_sccs.c utftpd_rcs.c utftpd_novc.c wait_check.c timing.c 	parse_ipport.c utftpd_nak.c
+
+utftpd_LDADD = libstr.a libio.a libcdb.a @LIBOBJS@
+utftpd_make_SOURCES = utftpd_make.c str2long.c str2ulong.c str_ulong.c uogetopt.c  parser.y
+utftpd_make_LDADD = libio.a libstr.a libcdbmake.a @LIBOBJS@
+utftpd_dump_SOURCES = utftpd_dump.c
+utftpd_dump_LDADD = libcdb.a @LIBOBJS@
+utftp_SOURCES = utftp.c uogetopt.c str2long.c str2ulong.c str_ulong.c
+utftp_LDADD = libtftp.a libstr.a libio.a libcdb.a @LIBOBJS@
+miniudpserv_SOURCES = miniudpserv.c uogetopt.c str2ulong.c str2long.c
+miniudpserv_LDADD = @LIBOBJS@
+
+@HAVE_GNU_MAKE_TRUE@DEPS_MAGIC := $(shell mkdir deps > /dev/null 2>&1 || :)
+ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = config.h
+CONFIG_CLEAN_FILES =  Specfile systype
+LIBRARIES =  $(noinst_LIBRARIES)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I.
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+ANSI2KNR = @ANSI2KNR@
+libstr_a_LIBADD = 
+libstr_a_OBJECTS =  uostr$U.o uostr_cstr$U.o uostr_uostr$U.o \
+uostr_cut$U.o uostr_mem$U.o uostr_char$U.o
+libio_a_LIBADD = 
+libio_a_OBJECTS =  uoio$U.o uoio_gd_uos$U.o
+libcdb_a_LIBADD = 
+libcdb_a_OBJECTS =  cdb_seek$U.o cdb_hash$U.o cdb_unpack$U.o
+libcdbmake_a_LIBADD = 
+libcdbmake_a_OBJECTS =  cdbmake_add$U.o cdbmake_hash$U.o \
+cdbmake_pack$U.o
+libtftp_a_LIBADD = 
+libtftp_a_OBJECTS =  tftp_nak$U.o tftp_s_ctrl$U.o tftp_send$U.o \
+tftp_receive$U.o tftp_prepare$U.o tftp_f_ctrl$U.o
+AR = ar
+PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS) $(sbin_PROGRAMS)
+
+utftp_OBJECTS =  utftp$U.o uogetopt$U.o str2long$U.o str2ulong$U.o \
+str_ulong$U.o
+utftp_DEPENDENCIES =  libtftp.a libstr.a libio.a libcdb.a @LIBOBJS@
+utftp_LDFLAGS = 
+miniudpserv_OBJECTS =  miniudpserv$U.o uogetopt$U.o str2ulong$U.o \
+str2long$U.o
+miniudpserv_DEPENDENCIES =  @LIBOBJS@
+miniudpserv_LDFLAGS = 
+utftpd_OBJECTS =  utftpd$U.o uogetopt$U.o str2long$U.o str2ulong$U.o \
+nonblock$U.o wildmat$U.o utftpd_recv$U.o str_ulong$U.o utftpd_send$U.o \
+utftpd_sccs$U.o utftpd_rcs$U.o utftpd_novc$U.o wait_check$U.o \
+timing$U.o parse_ipport$U.o utftpd_nak$U.o
+utftpd_DEPENDENCIES =  libstr.a libio.a libcdb.a @LIBOBJS@
+utftpd_LDFLAGS = 
+utftpd_make_OBJECTS =  utftpd_make$U.o str2long$U.o str2ulong$U.o \
+str_ulong$U.o uogetopt$U.o parser$U.o
+utftpd_make_DEPENDENCIES =  libio.a libstr.a libcdbmake.a @LIBOBJS@
+utftpd_make_LDFLAGS = 
+utftpd_dump_OBJECTS =  utftpd_dump$U.o
+utftpd_dump_DEPENDENCIES =  libcdb.a @LIBOBJS@
+utftpd_dump_LDFLAGS = 
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+man1dir = $(mandir)/man1
+man5dir = $(mandir)/man5
+man8dir = $(mandir)/man8
+MANS = $(man_MANS)
+
+NROFF = nroff
+HEADERS =  $(noinst_HEADERS)
+
+DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
+Makefile.am Makefile.in NEWS Specfile.in TODO acconfig.h acinclude.m4 \
+aclocal.m4 ansi2knr.1 ansi2knr.c config.h.in configure configure.in \
+inet_aton.c install-sh memcmp.c missing mkinstalldirs parser.c \
+systype.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = gtar
+GZIP_ENV = --best
+SOURCES = $(libstr_a_SOURCES) $(libio_a_SOURCES) $(libcdb_a_SOURCES) $(libcdbmake_a_SOURCES) $(libtftp_a_SOURCES) $(utftp_SOURCES) $(miniudpserv_SOURCES) $(utftpd_SOURCES) $(utftpd_make_SOURCES) $(utftpd_dump_SOURCES)
+OBJECTS = $(libstr_a_OBJECTS) $(libio_a_OBJECTS) $(libcdb_a_OBJECTS) $(libcdbmake_a_OBJECTS) $(libtftp_a_OBJECTS) $(utftp_OBJECTS) $(miniudpserv_OBJECTS) $(utftpd_OBJECTS) $(utftpd_make_OBJECTS) $(utftpd_dump_OBJECTS)
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .o .s .y
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+$(ACLOCAL_M4):  configure.in  acinclude.m4
+	cd $(srcdir) && $(ACLOCAL)
+
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+	$(SHELL) ./config.status --recheck
+$(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+	cd $(srcdir) && $(AUTOCONF)
+
+config.h: stamp-h
+	@if test ! -f $@; then \
+		rm -f stamp-h; \
+		$(MAKE) stamp-h; \
+	else :; fi
+stamp-h: $(srcdir)/config.h.in $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES= CONFIG_HEADERS=config.h \
+	     $(SHELL) ./config.status
+	@echo timestamp > stamp-h 2> /dev/null
+$(srcdir)/config.h.in: $(srcdir)/stamp-h.in
+	@if test ! -f $@; then \
+		rm -f $(srcdir)/stamp-h.in; \
+		$(MAKE) $(srcdir)/stamp-h.in; \
+	else :; fi
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
+	cd $(top_srcdir) && $(AUTOHEADER)
+	@echo timestamp > $(srcdir)/stamp-h.in 2> /dev/null
+
+mostlyclean-hdr:
+
+clean-hdr:
+
+distclean-hdr:
+	-rm -f config.h
+
+maintainer-clean-hdr:
+Specfile: $(top_builddir)/config.status Specfile.in
+	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+systype: $(top_builddir)/config.status systype.in
+	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+mostlyclean-noinstLIBRARIES:
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+
+distclean-noinstLIBRARIES:
+
+maintainer-clean-noinstLIBRARIES:
+
+.c.o:
+	$(COMPILE) -c $<
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+mostlyclean-krextra:
+
+clean-krextra:
+	-rm -f ansi2knr
+
+distclean-krextra:
+
+maintainer-clean-krextra:
+ansi2knr: ansi2knr.o
+	$(LINK) ansi2knr.o $(LIBS)
+ansi2knr.o: $(CONFIG_HEADER)
+
+
+mostlyclean-kr:
+	-rm -f *_.c
+
+clean-kr:
+
+distclean-kr:
+
+maintainer-clean-kr:
+
+libstr.a: $(libstr_a_OBJECTS) $(libstr_a_DEPENDENCIES)
+	-rm -f libstr.a
+	$(AR) cru libstr.a $(libstr_a_OBJECTS) $(libstr_a_LIBADD)
+	$(RANLIB) libstr.a
+
+libio.a: $(libio_a_OBJECTS) $(libio_a_DEPENDENCIES)
+	-rm -f libio.a
+	$(AR) cru libio.a $(libio_a_OBJECTS) $(libio_a_LIBADD)
+	$(RANLIB) libio.a
+
+libcdb.a: $(libcdb_a_OBJECTS) $(libcdb_a_DEPENDENCIES)
+	-rm -f libcdb.a
+	$(AR) cru libcdb.a $(libcdb_a_OBJECTS) $(libcdb_a_LIBADD)
+	$(RANLIB) libcdb.a
+
+libcdbmake.a: $(libcdbmake_a_OBJECTS) $(libcdbmake_a_DEPENDENCIES)
+	-rm -f libcdbmake.a
+	$(AR) cru libcdbmake.a $(libcdbmake_a_OBJECTS) $(libcdbmake_a_LIBADD)
+	$(RANLIB) libcdbmake.a
+
+libtftp.a: $(libtftp_a_OBJECTS) $(libtftp_a_DEPENDENCIES)
+	-rm -f libtftp.a
+	$(AR) cru libtftp.a $(libtftp_a_OBJECTS) $(libtftp_a_LIBADD)
+	$(RANLIB) libtftp.a
+
+mostlyclean-binPROGRAMS:
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+distclean-binPROGRAMS:
+
+maintainer-clean-binPROGRAMS:
+
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	done
+
+mostlyclean-noinstPROGRAMS:
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+
+distclean-noinstPROGRAMS:
+
+maintainer-clean-noinstPROGRAMS:
+
+mostlyclean-sbinPROGRAMS:
+
+clean-sbinPROGRAMS:
+	-test -z "$(sbin_PROGRAMS)" || rm -f $(sbin_PROGRAMS)
+
+distclean-sbinPROGRAMS:
+
+maintainer-clean-sbinPROGRAMS:
+
+install-sbinPROGRAMS: $(sbin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(sbindir)
+	@list='$(sbin_PROGRAMS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(sbindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(sbindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	  else :; fi; \
+	done
+
+uninstall-sbinPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	list='$(sbin_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(sbindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	done
+
+utftp: $(utftp_OBJECTS) $(utftp_DEPENDENCIES)
+	@rm -f utftp
+	$(LINK) $(utftp_LDFLAGS) $(utftp_OBJECTS) $(utftp_LDADD) $(LIBS)
+
+miniudpserv: $(miniudpserv_OBJECTS) $(miniudpserv_DEPENDENCIES)
+	@rm -f miniudpserv
+	$(LINK) $(miniudpserv_LDFLAGS) $(miniudpserv_OBJECTS) $(miniudpserv_LDADD) $(LIBS)
+
+utftpd: $(utftpd_OBJECTS) $(utftpd_DEPENDENCIES)
+	@rm -f utftpd
+	$(LINK) $(utftpd_LDFLAGS) $(utftpd_OBJECTS) $(utftpd_LDADD) $(LIBS)
+
+utftpd_make: $(utftpd_make_OBJECTS) $(utftpd_make_DEPENDENCIES)
+	@rm -f utftpd_make
+	$(LINK) $(utftpd_make_LDFLAGS) $(utftpd_make_OBJECTS) $(utftpd_make_LDADD) $(LIBS)
+
+utftpd_dump: $(utftpd_dump_OBJECTS) $(utftpd_dump_DEPENDENCIES)
+	@rm -f utftpd_dump
+	$(LINK) $(utftpd_dump_LDFLAGS) $(utftpd_dump_OBJECTS) $(utftpd_dump_LDADD) $(LIBS)
+cdb_hash_.c: cdb_hash.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/cdb_hash.c; then echo $(srcdir)/cdb_hash.c; else echo cdb_hash.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > cdb_hash_.c
+cdb_seek_.c: cdb_seek.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/cdb_seek.c; then echo $(srcdir)/cdb_seek.c; else echo cdb_seek.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > cdb_seek_.c
+cdb_unpack_.c: cdb_unpack.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/cdb_unpack.c; then echo $(srcdir)/cdb_unpack.c; else echo cdb_unpack.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > cdb_unpack_.c
+cdbmake_add_.c: cdbmake_add.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/cdbmake_add.c; then echo $(srcdir)/cdbmake_add.c; else echo cdbmake_add.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > cdbmake_add_.c
+cdbmake_hash_.c: cdbmake_hash.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/cdbmake_hash.c; then echo $(srcdir)/cdbmake_hash.c; else echo cdbmake_hash.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > cdbmake_hash_.c
+cdbmake_pack_.c: cdbmake_pack.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/cdbmake_pack.c; then echo $(srcdir)/cdbmake_pack.c; else echo cdbmake_pack.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > cdbmake_pack_.c
+inet_aton_.c: inet_aton.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/inet_aton.c; then echo $(srcdir)/inet_aton.c; else echo inet_aton.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > inet_aton_.c
+memcmp_.c: memcmp.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/memcmp.c; then echo $(srcdir)/memcmp.c; else echo memcmp.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > memcmp_.c
+miniudpserv_.c: miniudpserv.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/miniudpserv.c; then echo $(srcdir)/miniudpserv.c; else echo miniudpserv.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > miniudpserv_.c
+nonblock_.c: nonblock.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/nonblock.c; then echo $(srcdir)/nonblock.c; else echo nonblock.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > nonblock_.c
+parse_ipport_.c: parse_ipport.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/parse_ipport.c; then echo $(srcdir)/parse_ipport.c; else echo parse_ipport.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > parse_ipport_.c
+parser_.c: parser.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/parser.c; then echo $(srcdir)/parser.c; else echo parser.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > parser_.c
+str2long_.c: str2long.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/str2long.c; then echo $(srcdir)/str2long.c; else echo str2long.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > str2long_.c
+str2ulong_.c: str2ulong.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/str2ulong.c; then echo $(srcdir)/str2ulong.c; else echo str2ulong.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > str2ulong_.c
+str_ulong_.c: str_ulong.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/str_ulong.c; then echo $(srcdir)/str_ulong.c; else echo str_ulong.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > str_ulong_.c
+tftp_f_ctrl_.c: tftp_f_ctrl.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/tftp_f_ctrl.c; then echo $(srcdir)/tftp_f_ctrl.c; else echo tftp_f_ctrl.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > tftp_f_ctrl_.c
+tftp_nak_.c: tftp_nak.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/tftp_nak.c; then echo $(srcdir)/tftp_nak.c; else echo tftp_nak.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > tftp_nak_.c
+tftp_prepare_.c: tftp_prepare.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/tftp_prepare.c; then echo $(srcdir)/tftp_prepare.c; else echo tftp_prepare.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > tftp_prepare_.c
+tftp_receive_.c: tftp_receive.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/tftp_receive.c; then echo $(srcdir)/tftp_receive.c; else echo tftp_receive.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > tftp_receive_.c
+tftp_s_ctrl_.c: tftp_s_ctrl.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/tftp_s_ctrl.c; then echo $(srcdir)/tftp_s_ctrl.c; else echo tftp_s_ctrl.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > tftp_s_ctrl_.c
+tftp_send_.c: tftp_send.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/tftp_send.c; then echo $(srcdir)/tftp_send.c; else echo tftp_send.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > tftp_send_.c
+timing_.c: timing.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/timing.c; then echo $(srcdir)/timing.c; else echo timing.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > timing_.c
+uogetopt_.c: uogetopt.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/uogetopt.c; then echo $(srcdir)/uogetopt.c; else echo uogetopt.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > uogetopt_.c
+uoio_.c: uoio.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/uoio.c; then echo $(srcdir)/uoio.c; else echo uoio.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > uoio_.c
+uoio_gd_uos_.c: uoio_gd_uos.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/uoio_gd_uos.c; then echo $(srcdir)/uoio_gd_uos.c; else echo uoio_gd_uos.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > uoio_gd_uos_.c
+uostr_.c: uostr.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/uostr.c; then echo $(srcdir)/uostr.c; else echo uostr.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > uostr_.c
+uostr_char_.c: uostr_char.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/uostr_char.c; then echo $(srcdir)/uostr_char.c; else echo uostr_char.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > uostr_char_.c
+uostr_cstr_.c: uostr_cstr.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/uostr_cstr.c; then echo $(srcdir)/uostr_cstr.c; else echo uostr_cstr.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > uostr_cstr_.c
+uostr_cut_.c: uostr_cut.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/uostr_cut.c; then echo $(srcdir)/uostr_cut.c; else echo uostr_cut.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > uostr_cut_.c
+uostr_mem_.c: uostr_mem.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/uostr_mem.c; then echo $(srcdir)/uostr_mem.c; else echo uostr_mem.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > uostr_mem_.c
+uostr_uostr_.c: uostr_uostr.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/uostr_uostr.c; then echo $(srcdir)/uostr_uostr.c; else echo uostr_uostr.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > uostr_uostr_.c
+utftp_.c: utftp.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftp.c; then echo $(srcdir)/utftp.c; else echo utftp.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftp_.c
+utftpd_.c: utftpd.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftpd.c; then echo $(srcdir)/utftpd.c; else echo utftpd.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftpd_.c
+utftpd_dump_.c: utftpd_dump.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftpd_dump.c; then echo $(srcdir)/utftpd_dump.c; else echo utftpd_dump.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftpd_dump_.c
+utftpd_make_.c: utftpd_make.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftpd_make.c; then echo $(srcdir)/utftpd_make.c; else echo utftpd_make.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftpd_make_.c
+utftpd_nak_.c: utftpd_nak.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftpd_nak.c; then echo $(srcdir)/utftpd_nak.c; else echo utftpd_nak.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftpd_nak_.c
+utftpd_novc_.c: utftpd_novc.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftpd_novc.c; then echo $(srcdir)/utftpd_novc.c; else echo utftpd_novc.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftpd_novc_.c
+utftpd_rcs_.c: utftpd_rcs.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftpd_rcs.c; then echo $(srcdir)/utftpd_rcs.c; else echo utftpd_rcs.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftpd_rcs_.c
+utftpd_recv_.c: utftpd_recv.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftpd_recv.c; then echo $(srcdir)/utftpd_recv.c; else echo utftpd_recv.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftpd_recv_.c
+utftpd_sccs_.c: utftpd_sccs.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftpd_sccs.c; then echo $(srcdir)/utftpd_sccs.c; else echo utftpd_sccs.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftpd_sccs_.c
+utftpd_send_.c: utftpd_send.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utftpd_send.c; then echo $(srcdir)/utftpd_send.c; else echo utftpd_send.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utftpd_send_.c
+wait_check_.c: wait_check.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/wait_check.c; then echo $(srcdir)/wait_check.c; else echo wait_check.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > wait_check_.c
+wildmat_.c: wildmat.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/wildmat.c; then echo $(srcdir)/wildmat.c; else echo wildmat.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > wildmat_.c
+cdb_hash_.o cdb_seek_.o cdb_unpack_.o cdbmake_add_.o cdbmake_hash_.o \
+cdbmake_pack_.o inet_aton_.o memcmp_.o miniudpserv_.o nonblock_.o \
+parse_ipport_.o parser_.o str2long_.o str2ulong_.o str_ulong_.o \
+tftp_f_ctrl_.o tftp_nak_.o tftp_prepare_.o tftp_receive_.o \
+tftp_s_ctrl_.o tftp_send_.o timing_.o uogetopt_.o uoio_.o \
+uoio_gd_uos_.o uostr_.o uostr_char_.o uostr_cstr_.o uostr_cut_.o \
+uostr_mem_.o uostr_uostr_.o utftp_.o utftpd_.o utftpd_dump_.o \
+utftpd_make_.o utftpd_nak_.o utftpd_novc_.o utftpd_rcs_.o \
+utftpd_recv_.o utftpd_sccs_.o utftpd_send_.o wait_check_.o wildmat_.o : \
+$(ANSI2KNR)
+.y.c:
+	$(YACC) $(AM_YFLAGS) $(YFLAGS) $< && mv y.tab.c $*.c
+	if test -f y.tab.h; then \
+	if cmp -s y.tab.h $*.h; then rm -f y.tab.h; else mv y.tab.h $*.h; fi; \
+	else :; fi
+parser.h: parser.c
+
+
+install-man1:
+	$(mkinstalldirs) $(DESTDIR)$(man1dir)
+	@list='$(man1_MANS)'; \
+	l2='$(man_MANS)'; for i in $$l2; do \
+	  case "$$i" in \
+	    *.1*) list="$$list $$i" ;; \
+	  esac; \
+	done; \
+	for i in $$list; do \
+	  if test -f $(srcdir)/$$i; then file=$(srcdir)/$$i; \
+	  else file=$$i; fi; \
+	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
+	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
+	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
+	  echo " $(INSTALL_DATA) $$file $(DESTDIR)$(man1dir)/$$inst"; \
+	  $(INSTALL_DATA) $$file $(DESTDIR)$(man1dir)/$$inst; \
+	done
+
+uninstall-man1:
+	@list='$(man1_MANS)'; \
+	l2='$(man_MANS)'; for i in $$l2; do \
+	  case "$$i" in \
+	    *.1*) list="$$list $$i" ;; \
+	  esac; \
+	done; \
+	for i in $$list; do \
+	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
+	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
+	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
+	  echo " rm -f $(DESTDIR)$(man1dir)/$$inst"; \
+	  rm -f $(DESTDIR)$(man1dir)/$$inst; \
+	done
+
+install-man5:
+	$(mkinstalldirs) $(DESTDIR)$(man5dir)
+	@list='$(man5_MANS)'; \
+	l2='$(man_MANS)'; for i in $$l2; do \
+	  case "$$i" in \
+	    *.5*) list="$$list $$i" ;; \
+	  esac; \
+	done; \
+	for i in $$list; do \
+	  if test -f $(srcdir)/$$i; then file=$(srcdir)/$$i; \
+	  else file=$$i; fi; \
+	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
+	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
+	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
+	  echo " $(INSTALL_DATA) $$file $(DESTDIR)$(man5dir)/$$inst"; \
+	  $(INSTALL_DATA) $$file $(DESTDIR)$(man5dir)/$$inst; \
+	done
+
+uninstall-man5:
+	@list='$(man5_MANS)'; \
+	l2='$(man_MANS)'; for i in $$l2; do \
+	  case "$$i" in \
+	    *.5*) list="$$list $$i" ;; \
+	  esac; \
+	done; \
+	for i in $$list; do \
+	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
+	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
+	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
+	  echo " rm -f $(DESTDIR)$(man5dir)/$$inst"; \
+	  rm -f $(DESTDIR)$(man5dir)/$$inst; \
+	done
+
+install-man8:
+	$(mkinstalldirs) $(DESTDIR)$(man8dir)
+	@list='$(man8_MANS)'; \
+	l2='$(man_MANS)'; for i in $$l2; do \
+	  case "$$i" in \
+	    *.8*) list="$$list $$i" ;; \
+	  esac; \
+	done; \
+	for i in $$list; do \
+	  if test -f $(srcdir)/$$i; then file=$(srcdir)/$$i; \
+	  else file=$$i; fi; \
+	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
+	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
+	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
+	  echo " $(INSTALL_DATA) $$file $(DESTDIR)$(man8dir)/$$inst"; \
+	  $(INSTALL_DATA) $$file $(DESTDIR)$(man8dir)/$$inst; \
+	done
+
+uninstall-man8:
+	@list='$(man8_MANS)'; \
+	l2='$(man_MANS)'; for i in $$l2; do \
+	  case "$$i" in \
+	    *.8*) list="$$list $$i" ;; \
+	  esac; \
+	done; \
+	for i in $$list; do \
+	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
+	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
+	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
+	  echo " rm -f $(DESTDIR)$(man8dir)/$$inst"; \
+	  rm -f $(DESTDIR)$(man8dir)/$$inst; \
+	done
+install-man: $(MANS)
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-man1 install-man5 install-man8
+uninstall-man:
+	@$(NORMAL_UNINSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-man1 uninstall-man5 uninstall-man8
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES) config.h.in $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)config.h.in$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags config.h.in $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(PACKAGE)-$(VERSION)
+top_distdir = $(distdir)
+
+# This target untars the dist file and tries a VPATH configuration.  Then
+# it guarantees that the distribution is self-contained by making another
+# tarfile.
+distcheck: dist
+	-rm -rf $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
+	mkdir $(distdir)/=build
+	mkdir $(distdir)/=inst
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \
+	cd $(distdir)/=build \
+	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
+	  && $(MAKE) $(AM_MAKEFLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
+	  && $(MAKE) $(AM_MAKEFLAGS) check \
+	  && $(MAKE) $(AM_MAKEFLAGS) install \
+	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
+	  && $(MAKE) $(AM_MAKEFLAGS) dist
+	-rm -rf $(distdir)
+	@banner="$(distdir).tar.gz is ready for distribution"; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"
+dist: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+dist-all: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+distdir: $(DISTFILES)
+	-rm -rf $(distdir)
+	mkdir $(distdir)
+	-chmod 777 $(distdir)
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+check-TESTS: $(TESTS)
+	@failed=0; all=0; \
+	srcdir=$(srcdir); export srcdir; \
+	for tst in $(TESTS); do \
+	  if test -f $$tst; then dir=.; \
+	  else dir="$(srcdir)"; fi; \
+	  if $(TESTS_ENVIRONMENT) $$dir/$$tst; then \
+	    all=`expr $$all + 1`; \
+	    echo "PASS: $$tst"; \
+	  elif test $$? -ne 77; then \
+	    all=`expr $$all + 1`; \
+	    failed=`expr $$failed + 1`; \
+	    echo "FAIL: $$tst"; \
+	  fi; \
+	done; \
+	if test "$$failed" -eq 0; then \
+	  banner="All $$all tests passed"; \
+	else \
+	  banner="$$failed of $$all tests failed"; \
+	fi; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"; \
+	test "$$failed" -eq 0
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+all-recursive-am: config.h
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+
+install-exec-am: install-binPROGRAMS install-sbinPROGRAMS
+install-exec: install-exec-am
+
+install-data-am: install-man
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am: uninstall-binPROGRAMS uninstall-sbinPROGRAMS uninstall-man
+uninstall: uninstall-am
+all-am: Makefile $(ANSI2KNR) $(LIBRARIES) $(PROGRAMS) $(MANS) $(HEADERS) \
+		config.h
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(sbindir) \
+		$(DESTDIR)$(mandir)/man1 $(DESTDIR)$(mandir)/man5 \
+		$(DESTDIR)$(mandir)/man8
+
+
+mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	-test -z "parserhparserc" || rm -f parserh parserc
+mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstLIBRARIES \
+		mostlyclean-compile mostlyclean-krextra mostlyclean-kr \
+		mostlyclean-binPROGRAMS mostlyclean-noinstPROGRAMS \
+		mostlyclean-sbinPROGRAMS mostlyclean-tags \
+		mostlyclean-generic mostlyclean-local
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-hdr clean-noinstLIBRARIES clean-compile clean-krextra \
+		clean-kr clean-binPROGRAMS clean-noinstPROGRAMS \
+		clean-sbinPROGRAMS clean-tags clean-generic \
+		mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-hdr distclean-noinstLIBRARIES distclean-compile \
+		distclean-krextra distclean-kr distclean-binPROGRAMS \
+		distclean-noinstPROGRAMS distclean-sbinPROGRAMS \
+		distclean-tags distclean-generic clean-am
+
+distclean: distclean-am
+	-rm -f config.status
+
+maintainer-clean-am:  maintainer-clean-hdr \
+		maintainer-clean-noinstLIBRARIES \
+		maintainer-clean-compile maintainer-clean-krextra \
+		maintainer-clean-kr maintainer-clean-binPROGRAMS \
+		maintainer-clean-noinstPROGRAMS \
+		maintainer-clean-sbinPROGRAMS maintainer-clean-tags \
+		maintainer-clean-generic distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+	-rm -f config.status
+
+.PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
+mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile mostlyclean-krextra distclean-krextra \
+clean-krextra maintainer-clean-krextra mostlyclean-kr distclean-kr \
+clean-kr maintainer-clean-kr mostlyclean-binPROGRAMS \
+distclean-binPROGRAMS clean-binPROGRAMS maintainer-clean-binPROGRAMS \
+uninstall-binPROGRAMS install-binPROGRAMS mostlyclean-noinstPROGRAMS \
+distclean-noinstPROGRAMS clean-noinstPROGRAMS \
+maintainer-clean-noinstPROGRAMS mostlyclean-sbinPROGRAMS \
+distclean-sbinPROGRAMS clean-sbinPROGRAMS maintainer-clean-sbinPROGRAMS \
+uninstall-sbinPROGRAMS install-sbinPROGRAMS install-man1 uninstall-man1 \
+install-man5 uninstall-man5 install-man8 uninstall-man8 install-man \
+uninstall-man tags mostlyclean-tags distclean-tags clean-tags \
+maintainer-clean-tags distdir check-TESTS info-am info dvi-am dvi check \
+check-am installcheck-am installcheck all-recursive-am install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+# no dependency tracking without GNU make
+@HAVE_GNU_MAKE_TRUE@-include $(addprefix ./deps/,$(SOURCES:.c=.d))
+@HAVE_GNU_MAKE_TRUE@mostlyclean-local: 
+@HAVE_GNU_MAKE_TRUE@	rm -rf deps
+@HAVE_GNU_MAKE_TRUE@deps/%.d: %.c $(noinst_HEADERS)
+@HAVE_GNU_MAKE_TRUE@@HAVE_GCC_DEP_TRUE@	@echo mkdep $< 
+@HAVE_GNU_MAKE_TRUE@@HAVE_GCC_DEP_TRUE@	@$(COMPILE) -Wp,-MMD,./deps/$(@F) -E $< >/dev/null
+# no dependency generating without GCC
+@HAVE_GNU_MAKE_TRUE@@HAVE_GCC_DEP_FALSE@	@exit 0
+
+rpm: $(PACKAGE_VERSION).tar.gz Specfile
+	$(srcdir)/buildrpm $(srcdir)
+success:
+	sh systype | mail uwe-generic-counter@ohse.de
+cvs-dist:
+	@if sed 1q NEWS | grep -e "$(VERSION)" > /dev/null; then :; else \
+		echo "NEWS not updated; not releasing" 1>&2; \
+		exit 1;                                   \
+	fi
+	cvs tag `echo "Release-$(VERSION)" | sed 's/\./-/g'`
+	$(MAKE) dist
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

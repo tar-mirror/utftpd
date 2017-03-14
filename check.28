@@ -1,0 +1,27 @@
+#! /bin/sh
+
+test -f check..rcs || exit 77
+
+. $srcdir/check_lib
+check_start 28 "get (RRQ) access rights checking with RCS"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read($CHECKDIR/s/1)
+default:rcs-ci($RCS_CI)rcs-co($RCS_CO)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+cd $CHECKDIR/s
+echo 1234 1 >1
+echo 1234 2 >2
+$RCS_CI -q 1 </dev/null
+$RCS_CI -q 2 </dev/null
+echo 1234 3 >3
+cd $wd
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/1     $CHECKDIR/c/1
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/2     $CHECKDIR/c/2
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/3     $CHECKDIR/c/3
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/RCS/1,v $CHECKDIR/c/4
+check_end

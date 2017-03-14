@@ -1,0 +1,64 @@
+#! /bin/sh
+
+test -f check..sccs || exit 77
+
+. $srcdir/check_lib
+check_start 20 "put (WRQ) of a checked out SCCS file"
+# this checks that utftpd does not overwrite writeable files on WRQ request.
+# it also checks that readonly checked out files don't disturb operation.
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write($CHECKDIR)
+default:sccs-get($SCCS_GET)sccs-delta($SCCS_DELTA)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for i in `cat check..sccs_few_files` ; do
+	cd $CHECKDIR/s
+	echo 123 >123
+	cp $wd/$i ./$i
+	echo 123 >./$i.ro
+	sccs_create $i
+	sccs_create $i.ro
+	$SCCS_GET -s -e SCCS/s.$i
+	rm -f $i && echo 123 >$i
+	$SCCS_GET -s SCCS/s.$i.ro
+	cd $wd
+	do_test FAIL   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i    $i
+	# there now should the checked out file with "123" content.
+	if test "x$last_test_ok" = "x0" ; then
+		:
+	elif test -f $CHECKDIR/s/$i 2>/dev/null ; then
+		cd $CHECKDIR/s
+		if cmp $i 123 >/dev/null 2>/dev/null ; then
+			:
+		else
+			fail_after "checked out file has been overwritten"
+		fi
+		cd $wd
+	else
+		fail_after  "checked out file has vanished"
+	fi
+
+	do_test OK    ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i.ro    $i
+	# there now should be a SCCS file with two revisions, no checked out copy
+	if test "x$last_test_ok" = "x0" ; then
+		:
+	elif test -f $CHECKDIR/s/$i.ro 2>/dev/null ; then
+		fail_after  "there exists a checked out file which should not be there"
+	else
+		cd $CHECKDIR/s
+		# 1.2 must exist
+		$SCCS_GET -s -r1.2 SCCS/s.$i.ro 2>/dev/null
+		out=`cmp $i.ro $wd/$i`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after "SCCS revision 1.2 differs from sent file: $out"
+		fi
+		cd $wd
+	fi
+done
+check_end

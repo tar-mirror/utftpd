@@ -1,0 +1,49 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 41 "get/put (RRQ+WRQ) performance checking" --timing
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read,write,create($CHECKDIR/s)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+KBS="1 4 16 64 256 1024" 
+for i in $KBS ; do
+	dd if=/dev/zero of=$CHECKDIR/c/in  count=$i bs=1024 2>/dev/null
+	if test "×$TFTP" = x ; then 
+		:
+	else
+        do_test OK   tftp <<EOF
+mode binary
+connect 127.0.0.1 $CHECKPORT
+put $CHECKDIR/c/in $CHECKDIR/s/data
+quit
+EOF
+        do_test OK   tftp <<EOF
+mode binary
+connect 127.0.0.1 $CHECKPORT
+get $CHECKDIR/s/data $CHECKDIR/c/out
+quit
+EOF
+		out=`cmp $CHECKDIR/c/in $CHECKDIR/c/out`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after  "$out"
+		fi
+	fi
+	for size in $BLOCKSIZES ; do
+		do_test OK   ./utftp --put --blocksize $size 127.0.0.1:$CHECKPORT $CHECKDIR/s/data $CHECKDIR/c/in
+		do_test OK   ./utftp --get --blocksize $size 127.0.0.1:$CHECKPORT $CHECKDIR/s/data $CHECKDIR/c/out
+		out=`cmp $CHECKDIR/c/in $CHECKDIR/c/out`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after  "$out"
+		fi
+	done
+done
+check_end

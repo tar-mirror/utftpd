@@ -1,0 +1,44 @@
+#! /bin/sh
+
+test -f check..sccs || exit 77
+
+. $srcdir/check_lib
+check_start 21 "put (WRQ) of a not checked out SCCS file which exists nevertheless"
+# this checks that utftpd does not check in or overwrite files which exist although 
+# they are not checked out.
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write($CHECKDIR)
+default:sccs-get($SCCS_GET)sccs-delta($SCCS_DELTA)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for i in `cat check..sccs_few_files` ; do
+	cd $CHECKDIR/s
+	cp $wd/$i ./$i
+	sccs_create $i
+	# create illegal file.
+	cp $wd/$i ./$i
+	echo "difference" >>$i
+	cd $wd
+	do_test FAIL   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i    $i
+	# there now should the file in its original, illegal state.
+	if test "x$last_test_ok" = "x0" ; then
+		:
+	elif test -f $CHECKDIR/s/$i 2>/dev/null ; then
+		cp $wd/$i $CHECKDIR/s/$i.cmp
+		echo "difference" >>$CHECKDIR/s/$i.cmp
+		out=`cmp $CHECKDIR/s/$i $CHECKDIR/s/$i.cmp 2>&1`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after "file has been changed: $out"
+		fi
+		cd $wd
+	else
+		fail_after  "file does not exist anymore"
+	fi
+done
+check_end

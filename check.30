@@ -1,0 +1,58 @@
+#! /bin/sh
+
+test -f check..rcs || exit 77
+
+. $srcdir/check_lib
+check_start 30 "put (WRQ) of a locked, checked out, modified, RCS file"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read,write($CHECKDIR)
+default:rcs-ci($RCS_CI)rcs-co($RCS_CO)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for i in `cat check..rcs_few_files` ; do
+	cd $CHECKDIR/s
+	echo 123 >123
+	cp $wd/$i ./$i
+	$RCS_CI -q  $i </dev/null
+	$RCS_CO -q -l $i </dev/null
+	echo 123 >$i
+	cd $wd
+	do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i    $CHECKDIR/c/$i
+	# we should have got the file with the right content: $i
+	if test "x$last_test_ok" = "x0" ; then
+		:
+	elif test -f $CHECKDIR/s/$i 2>/dev/null ; then
+        out=`cmp $CHECKDIR/c/$i $i 2>&1`
+        if test $? -eq 0 ; then
+            :
+        else
+            fail_after "checkout didn't fetch the checked in file: $out"
+        fi
+	else
+		fail_after  "checked out file has vanished"
+	fi
+	
+	cd $CHECKDIR/s
+	$RCS_CI -q  $i </dev/null
+	cd $wd
+	do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i    $CHECKDIR/c/$i
+	# we should have got the file with the the "123" content
+	if test "x$last_test_ok" = "x0" ; then
+		:
+	elif test -f $CHECKDIR/s/$i 2>/dev/null ; then
+		fail_after  "there is a checked out which should not exist"
+	else
+        out=`cmp $CHECKDIR/c/$i $CHECKDIR/s/123 2>&1`
+        if test $? -eq 0 ; then
+            :
+        else
+            fail_after "didn't get the freshly checked in file: $out"
+        fi
+	fi
+
+done
+check_end

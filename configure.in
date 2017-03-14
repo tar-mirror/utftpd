@@ -1,0 +1,117 @@
+AC_INIT(utftpd.c)
+AM_INIT_AUTOMAKE(utftpd, 0.2.4)
+AM_CONFIG_HEADER(config.h)
+
+AC_ARG_ENABLE(efence,
+    [  --enable-efence         use efence library if available],
+	[WANT_EFENCE=1]
+)
+test "x`hostname 2>&1`" = xserak.ohse.de && WANT_EFENCE=1
+
+if test "x$CFLAGS" = x ; then old_cflags_empty=1; fi
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CPP
+if test "x$GCC" = xyes ; then 
+	if test "x$old_cflags_empty" = x1 ; then
+		if test "x$_CFLAGS_OWG" != x  ; then
+			# each environment should contain at least one helpful hack :-)
+			CFLAGS="$_CFLAGS_OWG"
+		fi
+	fi
+	AC_MSG_CHECKING([whether gcc supports -Wp,-MMD])
+	old="$CPPFLAGS"; CPPFLAGS="$CPPFLAGS -Wp,-MMD,myconftest.out -E"
+	AC_TRY_CPP(int main(void) {return 0;},test -s myconftest.out && GCC_DEP=yes)
+	rm -f myconftest.out
+	CPPFLAGS="$old";
+	if test "x$GCC_DEP" = xyes ; then AC_MSG_RESULT(yes) ; else AC_MSG_RESULT(no); fi
+else
+	if test "x$CC" = "xlcc" ; then 
+		if test "x$old_cflags_empty" = x1  ; then
+			CFLAGS="$_CFLAGS_LCC"
+		fi
+	fi
+fi
+if test "x$GCC_DEP" = xyes ; then : ; else
+	AC_MSG_WARN([dependency tracking disabled])
+fi
+AM_CONDITIONAL(HAVE_GCC_DEP, test "x$GCC_DEP" = "xyes")
+AC_PROG_RANLIB
+AC_PROG_YACC
+AC_CHECK_PROGS(MAKE,gnumake gmake make pmake,make)
+AC_MSG_CHECKING([for GNU make])
+	echo "include confMakefile2" >confMakefile1
+	echo "TESTFORGNUMAKE:" >confMakefile2
+	GNU_MAKE=no
+	$MAKE -f confMakefile1 >/dev/null 2>/dev/null && GNU_MAKE=yes
+	rm -f confMakefile2 confMakefile1
+	AC_MSG_RESULT($GNU_MAKE)
+	AM_CONDITIONAL(HAVE_GNU_MAKE, test "x$GNU_MAKE" = "xyes")
+	if test "x$GNU_MAKE" = "xno" ; then
+		AC_MSG_WARN([dependencies disabled])
+	fi
+AC_CHECK_PROGS(TFTP,tftp)
+AC_PATH_PROGS(SCCS_GET,get)
+AC_PATH_PROGS(SCCS_DELTA,delta)
+AC_PATH_PROGS(SCCS_UNGET,unget)
+AC_PATH_PROGS(SCCS_CLEAN,clean)
+AC_PATH_PROGS(RCS_CI,ci)
+AC_PATH_PROGS(RCS_CO,co)
+AM_C_PROTOTYPES
+
+dnl Checks for libraries.
+if test "x$WANT_EFENCE" = x ; then : ;  else
+	AC_CHECK_LIB(efence, main)
+fi
+dnl AC_CHECK_LIB(resolv, dn_expand)
+dnl SCO needs this.
+AC_CHECK_LIB(socket,syslog,,,)
+dnl BeOS needs this. What a stupid thing.
+AC_CHECK_LIB(be,syslog,,,)    
+dnl slowlartis needs this
+AC_CHECK_LIB(nsl,gethostbyname,,,)
+
+
+dnl Checks for header files.
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_CHECK_HEADERS(sys/time.h unistd.h sys/select.h)
+AC_CHECK_HEADERS(arpa/inet.h arpa/tftp.h)
+AC_HEADER_TIME
+UO_HEADER_SYS_SELECT
+UO_HEADER_SYS_UIO
+
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_OFF_T
+AC_TYPE_SIZE_T
+AC_CHECK_TYPE(ssize_t, int)
+UO_TYPE_SOCKLEN_T
+AC_CHECK_SIZEOF(unsigned short,2)
+AC_CHECK_SIZEOF(short,2)
+AC_CHECK_SIZEOF(int,4)
+AC_CHECK_SIZEOF(unsigned int,4)
+AC_CHECK_SIZEOF(long,4)
+AC_CHECK_SIZEOF(unsigned long,4)
+AC_CHECK_SIZEOF(long long,0)
+AC_CHECK_SIZEOF(unsigned long long,0)
+
+dnl Checks for library functions.
+AC_FUNC_MEMCMP
+AC_TYPE_SIGNAL
+AC_FUNC_VFORK
+AC_CHECK_FUNCS(gethostname socket strdup strerror strtol strtoul)
+AC_CHECK_FUNCS(fsync chroot)
+AC_REPLACE_FUNCS(inet_aton)
+if test "$GNU_MAKE" = yes -a "$MAKE" != "make"; then
+cat >&2 <<EOF
+***
+*** remember to use "$MAKE" to compile the package ***
+***
+EOF
+fi
+
+AC_OUTPUT(Makefile Specfile systype)

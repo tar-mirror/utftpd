@@ -1,0 +1,39 @@
+#! /bin/sh
+
+if test "x$SCCS_DELTA" = x -o "x$SCCS_GET" = x ; then exit 77 ; fi
+. $srcdir/check_lib
+check_start 37 "put (WRQ) checking, trying to put into a specific revision"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write,read($CHECKDIR)
+default:sccs-get($SCCS_GET)sccs-delta($SCCS_DELTA)sccs-clean($SCCS_CLEAN)sccs-unget($SCCS_UNGET)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+cd $CHECKDIR/s
+echo 1vers1 >check1.txt
+sccs_create  check1.txt
+
+cd $wd
+# no such revision
+echo "1vers2" >$CHECKDIR/c/check1.txt
+do_test OK   ./utftp --put --revision 1.4 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+echo "1vers3" >$CHECKDIR/c/check1.txt
+do_test OK   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+
+do_test OK   ./utftp --get --revision 1.4 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+echo "1vers2" >$CHECKDIR/c/cmp
+out=`diff $CHECKDIR/c/cmp $CHECKDIR/c/check1.txt`
+if test $? -ne 0 ; then
+	fail_after "didn't get my revision 1.4 out of SCCS: $out"
+fi
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+echo "1vers3" >$CHECKDIR/c/cmp
+out=`diff $CHECKDIR/c/cmp $CHECKDIR/c/check1.txt`
+if test $? -ne 0 ; then
+	fail_after "didn't get my latest revision out of SCCS: $out"
+fi
+
+check_end

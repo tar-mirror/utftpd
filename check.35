@@ -1,0 +1,60 @@
+#! /bin/sh
+
+if test "x$RCS_CO" = x -o "x$RCS_CI" = x ; then exit 77 ; fi
+. $srcdir/check_lib
+check_start 35 "get (RRQ) checking, trying to get old RCS revisions"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read($CHECKDIR)
+default:rcs-co($RCS_CO)rcs-ci($RCS_CI)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+cd $CHECKDIR/s
+echo 1vers1 >check1.txt
+$RCS_CI -q  check1.txt </dev/null
+
+echo 2vers1 >check2.txt
+$RCS_CI -q check2.txt </dev/null
+$RCS_CO -q -l check2.txt
+echo 2vers2 >check2.txt
+$RCS_CI -q check2.txt </dev/null >/dev/null 2>/dev/null
+$RCS_CO -q -l check2.txt
+echo 2vers3 >check2.txt
+$RCS_CI -q check2.txt >/dev/null </dev/null 2>/dev/null
+
+echo 3vers1 >check3.txt
+$RCS_CI -q check3.txt </dev/null
+$RCS_CO -q -l check3.txt
+echo 3vers2 >check3.txt
+$RCS_CI -q check3.txt </dev/null >/dev/null 2>/dev/null
+$RCS_CO -q -l check3.txt
+echo 3vers3 >check3.txt
+$RCS_CI -q check3.txt >/dev/null </dev/null 2>/dev/null
+$RCS_CO -q -r1.3 check3.txt
+
+cd $wd
+# "no such revision"? No:
+#   co -rN retrieves the latest revision whose number is less than or equal to N.
+do_test OK   ./utftp --get --revision 1.2 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+echo "1vers1" >$CHECKDIR/c/cmp
+out=`diff $CHECKDIR/c/cmp $CHECKDIR/c/check1.txt`
+if test $? -ne 0 ; then
+	fail_after "didn't get my revision 1.1 out of RCS: $out"
+fi
+do_test OK   ./utftp --get --revision 1.2 127.0.0.1:$CHECKPORT $CHECKDIR/s/check2.txt $CHECKDIR/c/check2.txt
+echo "2vers2" >$CHECKDIR/c/cmp
+out=`diff $CHECKDIR/c/cmp $CHECKDIR/c/check2.txt`
+if test $? -ne 0 ; then
+	fail_after "didn't get my revision 1.2 out of RCS: $out"
+fi
+do_test OK   ./utftp --get --revision 1.2 127.0.0.1:$CHECKPORT $CHECKDIR/s/check3.txt $CHECKDIR/c/check3.txt
+echo "3vers2" >$CHECKDIR/c/cmp
+out=`diff $CHECKDIR/c/cmp $CHECKDIR/c/check3.txt`
+if test $? -ne 0 ; then
+	fail_after "didn't get my revision 1.2 out of RCS: $out"
+fi
+
+check_end

@@ -1,0 +1,25 @@
+.TH utftpd_make 8
+.SH NAME
+utftpd_make \- compile rules for utftpd
+.SH SYNOPSIS
+.B "utftpd_make cdb-file tmp-file [input-file]"
+.SH DESCRIPTION
+.B utftpd_make compiles rules from a human readable format to 
+a database file which may be used by utftpd. The standard input
+will be read if
+.I input-file 
+is not given.
+
+.I tmp-file
+and 
+.I cdb-file have to be located on the same filesystem.
+
+.B utftpd_make
+updates 
+.I cdb-file
+atomically: you may use it even if utftpd is running.
+
+.SH "SEE ALSO"
+utftpd(8),
+utftpd.conf(5),
+RFC 1350.

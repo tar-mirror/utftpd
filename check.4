@@ -1,0 +1,27 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 4 "get (RRQ) checking without conversion, with blksize option"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read($wd)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+FILES="$FEW_FILES"
+
+for size in $BLOCKSIZES ; do
+	mkdir $CHECKDIR/c/$size
+	for i in $FILES ; do
+		do_test OK   ./utftp --get --blocksize $size 127.0.0.1:$CHECKPORT $wd/$i $CHECKDIR/c/$size/$i 
+		out=`cmp $wd/$i $CHECKDIR/c/$size/$i`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after  "$out"
+		fi
+	done
+done
+check_end

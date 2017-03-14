@@ -1,0 +1,26 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 12 "put (WRQ) checking without conversion, with blksize option"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:create($CHECKDIR/s)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for size in $BLOCKSIZES ; do
+	mkdir $CHECKDIR/s/$size
+	for i in $FEW_FILES ; do
+#		do_test OK  strace -vs 128 -o out.$i ./utftp --put --blocksize $size 127.0.0.1:$CHECKPORT $CHECKDIR/s/$size/$i $i 
+		do_test OK  ./utftp --put --blocksize $size 127.0.0.1:$CHECKPORT $CHECKDIR/s/$size/$i $i 
+		out=`cmp $wd/$i $CHECKDIR/s/$size/$i`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after  "$out"
+		fi
+	done
+done
+check_end

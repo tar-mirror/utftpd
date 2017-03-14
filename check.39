@@ -1,0 +1,30 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 39 "read access rights checking, no config file" NOCONFIG -t $CHECKDIR/s/124 $CHECKDIR/s/126/
+
+# setup configuration file
+umask 022;
+echo 123 >$CHECKDIR/s/123 
+mkdir     $CHECKDIR/s/124
+echo 124 >$CHECKDIR/s/124/124
+echo den >$CHECKDIR/s/124/deny ; chmod 600 $CHECKDIR/s/124/deny
+mkdir     $CHECKDIR/s/124/125
+mkdir     $CHECKDIR/s/126/
+echo 126 >$CHECKDIR/s/126/126
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/123     $CHECKDIR/c/1  # should not work: not allowed
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/124     $CHECKDIR/c/2  # should not work: is a directory
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/124 $CHECKDIR/c/3  # should work: allowed access to s/124
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/../123 $CHECKDIR/c/3  # should not work: /../
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/125 $CHECKDIR/c/4  # should not work: is a directory
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/126/126 $CHECKDIR/c/5  # should not work: "126/" on cmdline.
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT Makefile $CHECKDIR/c/5             # should not work: relative filename not found
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT 124 $CHECKDIR/c/5                  # should work: found as $CHECKDIR/s/124/124
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT deny $CHECKDIR/c/5                 # should not work: mode 600.
+check_restart 39 "read access rights checking, no config file, special case /" NOCONFIG -t /
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/124 $CHECKDIR/c/6  # should work: allowed access to s/124
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/126/126 $CHECKDIR/c/7  # should work this time.
+check_restart 39 "read access rights checking, no config file, no dirs" NOCONFIG -t
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/124 $CHECKDIR/c/6  # should work: allowed access to s/124
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/126/126 $CHECKDIR/c/7  # should work this time.
+check_end

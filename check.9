@@ -1,0 +1,24 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 9 "create access rights checking"
+
+# setup configuration file
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:create($CHECKDIR/s/123:$CHECKDIR/s/124:$CHECKDIR/s/126:$CHECKDIR/s/2*)
+EOF
+echo 123 >$CHECKDIR/s/123
+mkdir     $CHECKDIR/s/124
+echo 124 >$CHECKDIR/s/124/124
+echo 125 >$CHECKDIR/s/125
+echo 221 >$CHECKDIR/s/221
+echo "CONTENT" >$CHECKDIR/c/junk
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/123     $CHECKDIR/c/junk  # should not work: already exists
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124     $CHECKDIR/c/junk  # should not work: is a directory
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/124 $CHECKDIR/c/junk  # should not work: already exists
+do_test OK   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/124a $CHECKDIR/c/junk # should work: does not exist
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/125     $CHECKDIR/c/junk  # should not work: access denied
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/221     $CHECKDIR/c/junk  # should not work: already exists
+do_test OK   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/126     $CHECKDIR/c/junk  # should work: does not create
+check_end

@@ -1,0 +1,38 @@
+#! /bin/sh
+
+test -f check..sccs || exit 77
+if test "x$SCCS_CLEAN" = x  -a "x$SCCS_UNGET" = x ; then exit 77 ; fi
+. $srcdir/check_lib
+check_start 22 "put (WRQ) checkin of identical SCCS file"
+# this checks that utftpd does not check in which are unmodified.
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write($CHECKDIR)
+default:sccs-get($SCCS_GET)sccs-delta($SCCS_DELTA)sccs-clean($SCCS_CLEAN)sccs-unget($SCCS_UNGET)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for i in `cat check..sccs_few_files` ; do
+	cd $CHECKDIR/s
+	cp $wd/$i ./$i
+	sccs_create $i
+	cd $wd
+	do_test OK    ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i    $i
+	# there now should the file in its original, illegal state.
+	if test "x$last_test_ok" = "x0" ; then
+		:
+	elif test -f $CHECKDIR/s/$i 2>/dev/null ; then
+			fail_after  "file still exists, has not been checked in"
+	else
+		cd $CHECKDIR/s
+		# a new checkin would create a new revision 1.2
+		$SCCS_GET -s -r1.2 SCCS/s.$i 2>/dev/null
+		if test -f $i ; then
+			fail_after "identical copy has been checked in"
+		fi
+		cd $wd
+	fi
+done
+check_end

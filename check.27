@@ -1,0 +1,32 @@
+#! /bin/sh
+
+test -f check..rcs || exit 77
+. $srcdir/check_lib
+check_start 27 "get (RRQ) of an edited file of a RCSed file"
+# basically this tests that we do get the checked in version,
+# not the checked out version.
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read($CHECKDIR)
+default:rcs-ci($RCS_CI)rcs-co($RCS_CO)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for i in `cat check..rcs_few_files` ; do
+	cd $CHECKDIR/s
+	cp $wd/$i ./$i
+	$RCS_CI -q $i </dev/null
+	cp $wd/$i ./$i
+	echo 1 >>$i
+	cd $wd
+	do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i     $CHECKDIR/c/$i
+	out=`cmp $CHECKDIR/c/$i $i`
+	if test $? = 0 ; then
+		:
+	else
+		fail_after  "$out"
+	fi
+done
+check_end

@@ -1,0 +1,36 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_prestart
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read($wd)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+check_start 43 "get (RRQ) checking without conversion, 'standalone' mode" STANDALONE
+
+for i in $ALL_FILES ; do
+	if test -f $i ; then
+		touch "bg.done"
+		( ./utftp --get --timeout 17 127.0.0.1:$CHECKPORT $wd/$i $CHECKDIR/c/$i.junk ; rm -f "bg.done" )  &
+		do_test OK   ./utftp --get --timeout 17 127.0.0.1:$CHECKPORT $wd/$i $CHECKDIR/c/$i 
+		out=`cmp $wd/$i $CHECKDIR/c/$i`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after  "$out"
+		fi
+		while test -f  "bg.done" ; do
+			sleep 1
+		done
+		out=`cmp $wd/$i $CHECKDIR/c/$i.junk`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after  "backgroup job: $out"
+		fi
+	fi
+done
+check_end

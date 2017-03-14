@@ -1,0 +1,30 @@
+#! /bin/sh
+
+test -f check..sccs || exit 77
+
+. $srcdir/check_lib
+check_start 24 "put (WRQ) create access check of SCCS file"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:create($CHECKDIR/s/1:$CHECKDIR/s/2:$CHECKDIR/s/5)
+default:sccs-get($SCCS_GET)sccs-delta($SCCS_DELTA)sccs-clean($SCCS_CLEAN)sccs-unget($SCCS_UNGET)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+cd $CHECKDIR/s
+cp $wd/Makefile ./1
+cp $wd/Makefile ./2
+cp $wd/Makefile ./3
+cp $wd/Makefile ./4
+sccs_create 1 2 3 4
+$SCCS_GET -s -e SCCS/s.2
+$SCCS_GET -s -e SCCS/s.4
+cd $wd
+do_test FAIL  ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/1    config.log
+do_test FAIL  ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/2    config.log
+do_test FAIL  ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/3    config.log
+do_test FAIL  ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/4    config.log
+do_test OK    ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/5    config.log
+check_end

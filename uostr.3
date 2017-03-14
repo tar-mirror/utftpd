@@ -1,0 +1,337 @@
+.TH uostr 3
+.SH NAME
+uostr \- dynamically allocated strings
+.SH SYNTAX
+.B #include "uostr.h"
+.RS
+.nf
+typedef struct uostr_t {
+        char *data;
+        size_t size;
+        size_t len;
+} \fBuostr_t\fP;
+.fi
+.RE
+.sp
+.BI "uostr_t * uostr_allocmore(uostr_t *u, size_t bytes);"
+.br
+.BI "uostr_t * uostr_xallocmore(uostr_t *u, size_t bytes);"
+.br
+.BI "void uostr_freedata(uostr_t *);"
+.br
+.BI "void uostr_forget(uostr_t *);"
+.br
+.BI "uostr_t *uostr_cut(uostr_t *,long new_len);"
+.br
+.BI "uostr_fcut(uostr_t *): /* i'm a macro */"
+.br
+.BI uostr_needmore(uostr_t *,size_t bytes)
+.br
+.BI uostr_xneedmore(uostr_t *,size_t bytes)
+.br
+.BI uostr_need(uostr_t *,size_t bytes)
+.br
+.BI uostr_xneed(uostr_t *,size_t bytes)
+.PP
+.BI "uostr_t *uostr_dup_cstr(uostr_t *,const char *);"
+.br
+.BI "uostr_t *uostr_xdup_cstr(uostr_t *,const char *);"
+.br
+.BI "uostr_t *uostr_add_cstr(uostr_t *,const char *);"
+.br
+.BI "uostr_t *uostr_xadd_cstr(uostr_t *,const char *);"
+.PP
+.BI "uostr_t *uostr_dup_cstrmulti(uostr_t *u,...);"
+.br
+.BI "uostr_t *uostr_xdup_cstrmulti(uostr_t *u,...);"
+.br
+.BI "uostr_t *uostr_add_cstrmulti(uostr_t *u,...);"
+.br
+.BI "uostr_t *uostr_xadd_cstrmulti(uostr_t *u,...);"
+.PP
+.BI "uostr_t *uostr_dup_char(uostr_t *,const char);"
+.br
+.BI "uostr_t *uostr_xdup_char(uostr_t *,const char);"
+.br
+.BI "uostr_t *uostr_add_char(uostr_t *,const char);"
+.br
+.BI "uostr_t *uostr_xadd_char(uostr_t *,const char);"
+.PP
+.BI "uostr_t *uostr_dup_uostr(uostr_t *,const uostr_t *);"
+.br
+.BI "uostr_t *uostr_xdup_uostr(uostr_t *,const uostr_t *);"
+.br
+.BI "uostr_t *uostr_add_uostr(uostr_t *,const uostr_t *);"
+.br
+.BI "uostr_t *uostr_xadd_uostr(uostr_t *,const uostr_t *);"
+.PP
+.BI "uostr_t *uostr_dup_mem(uostr_t *,const void *, size_t len);"
+.br
+.BI "uostr_t *uostr_xdup_mem(uostr_t *,const void *, size_t len);"
+.br
+.BI "uostr_t *uostr_add_mem(uostr_t *,const void *, size_t len);"
+.br
+.BI "uostr_t *uostr_xadd_mem(uostr_t *,const void *, size_t len);"
+.br
+.BI "void (*uostr_xallocfn)(const char *);" 
+
+.SH DESCRIPTION
+An
+.B uostr_t
+variable holds a string in dynamically allocated space.
+The length of the string is unlimited (as long as
+malloc() permits). ASCII-0 is allowed as part of 
+the string and is not considered a terminating charakter
+by any of this functions.
+.br
+The functions do not silently append a trailing ASCII-0. The see a C
+string in the same way as the strlen() function does. You have to
+explicitly append a trailing 0.
+
+.br
+The functions are reasonable fast and safe against
+buffer overflows, you do not need to worry about
+overflowing the string boundaries. 
+
+The structure consists of the parts:
+.I data
+is the pointer to the data,
+.I size
+is the amount of memory allocated for the string (you should not care about it) and
+.I len
+is the length of the string (which may be of interest to you).
+
+To create a string use something like 
+.B uostr_t my_string={0}; .
+You need to return the memory to the system at a later time, use
+.B uostr_freedata(&my_string) 
+for that.
+
+The functions often allocate some bytes more than they need at the moment (they
+try to be clever and allocate a useful amount of memory), so there is often
+almost no performance penalty if you append something.
+.br
+If more space is needed the string may be moved in memory. Do not use pointers
+to the 
+.I uostr_t.data
+until you have finished adding things to it.
+
+Many functions come in two flavors: one being a normal function
+which returns a
+.I NULL
+in the
+.B out of memory
+situations, and the other one do not return in that case. The 
+naming convention is straightforward: if the name of the 
+function or macro contains an
+.B x
+it will not return. Use that with care. Normally those functions
+will terminate the program after they print 
+.I out of memory in uostr_FUNCTION_NAME 
+followed by a line feed. To change this behaviour use the 
+.B uostr_xallocfn 
+variable, see below.
+
+
+.I string
+is just a name, an 
+.B uostr_t 
+may actually contain whatever you want.
+
+.SH USAGE
+
+.I uostr_t * uostr_allocmore(uostr_t *u, size_t bytes);
+allocates more memory to the string. It returns 
+.B 0
+in case it cannot get more memory, but does not change
+anything. 
+.I uostr_t * uostr_xallocmore(uostr_t *u, size_t bytes);
+basically does the same thing, but does not return if it 
+cannot allocate more memory.
+
+.I uostr_needmore(uostr_t *,size_t bytes)
+and 
+.I uostr_xneedmore(uostr_t *,size_t bytes)
+are macros which call the allocmore functions
+if more memory needs to be allocated. They are
+somewhat more efficient than calling the
+functions "just in case".
+
+.I uostr_need(uostr_t *,size_t bytes)
+and
+.I uostr_xneed(uostr_t *,size_t bytes)
+are macros to make sure that 
+.B bytes
+bytes of memory are available for that
+string (you may want to use them if you
+know that the string will grow a lot).
+
+.I void uostr_freedata(uostr_t *s);
+frees the memory allocated to a string and 
+sets s->data to NULL.
+
+.I "void uostr_forget(uostr_t *);"
+tells the allocation routines of the uostr library
+to forget about that string. Usually they bark load
+("reusing using" + abort()) if they suspect a memory
+leak, which can lead to false alerts in cases like this:
+.EX
+.nf
+          char *overcomplicated_strdup(const char *text) 
+          {
+           uostr_t s=UOSTR_INIT;
+		   uostr_xadd_cstr(&s,text);
+           return s.data;
+          }
+.fi
+.EE
+Usually the second call to the function would fail because
+uostr_freedata() has not been called, but inserting an
+.I "uostr_forget(&s)"
+make the routines forget about that string (set the global
+variable 
+.B "int uostr_debug_free"
+to 0 to disable this behaviour completely).
+
+.I uostr_t *uostr_cut(uostr_t *,long new_len);
+cuts the length of a string. If 
+.I new_len
+is a positive integer the string will be cut to
+that amount of characters, otherwise it will be
+cut by that many characters.
+.br
+This function is often used with 
+.B uostr_t.len
+values safed before, see the example below.
+
+Note that the long should be a ssize_t, but that's
+not portable, and other functions in this library
+do not need a config.h and/or autoconf.
+
+.I uostr_fcut(uostr_t *);
+cuts the string to a length of exactly 0 characters.
+
+The following functions allocate more memory if they need
+it, and they all have a 
+.B x 
+variant:
+
+.I uostr_t *uostr_dup_cstr(uostr_t *,const char *);
+overwrites the string with the 
+.B C 
+language 0 terminated string, but will
+.B not
+duplicate the trailing ASCII-0.
+
+.I uostr_t *uostr_add_cstr(uostr_t *,const char *);
+appends the 0 terminated string to the uostr_t. It
+will not duplicate the trailing ASCII-0.
+
+.I uostr_t *uostr_dup_cstrmulti(uostr_t *u,...);
+overwrites the string with a concatenation of the arguments.
+You need to terminate the argument list with a 
+.B NULL .
+Use this for example for:
+.br
+.I uostr_dup_cstrmulti(&s,varname,"=",value,NULL);
+.br
+Use with care, it's easy to forget the trailing 
+NULL pointer. Not that this function does not
+terminate the string with an ASCII-0.
+
+.I uostr_t *uostr_add_cstrmulti(uostr_t *u,...);
+appends the string with the concatenation.
+
+.I uostr_t *uostr_dup_char(uostr_t *,const char);
+overwrites the string with a single character.
+
+.I uostr_t *uostr_add_char(uostr_t *,const char);
+appends a single character to the string.
+
+.I uostr_t *uostr_dup_uostr(uostr_t *,const uostr_t *);
+overwrites one uostr with the data of the other.
+
+.I uostr_t *uostr_add_uostr(uostr_t *,const uostr_t *);
+append one string to the other.
+
+.I uostr_t *uostr_dup_mem(uostr_t *,const void *, size_t len);
+overwrites the string with an arbitrary amount of 
+characters from the memory. This is the basic function all
+.I uostr_dup_something 
+functions are based on.
+
+.I uostr_t *uostr_add_mem(uostr_t *,const void *, size_t len);
+appends an arbitrary amount of characters from the memory to the string. 
+This is the basic function all
+.I uostr_add_something 
+functions are based on.
+
+.I uostr_0(uostr_t *)
+and
+.I uostr_x0(uostr_t *)
+are simple macros which append a ASCII-0 (C string functions 
+recognize this as string terminator) to a string.
+
+.I uostr_xallocfn
+is a variable defined like this:
+
+.B "extern void (*uostr_xallocfn)(const char *);"
+
+This function will, if it contains a value different from the
+NULL pointer (which behaves in all practical aspects very much
+like the 0), call another function to terminate the program. It
+will get one argument, the name of the function which failed
+to allocate memory. Please not that your function must call
+exit.
+
+The default function will simple print 
+.I "out of memory in uostr_FUNCTION_NAME"
+followed by a line feed.
+
+.SH EXAMPLE
+Error handling omitted.
+
+  uostr_t path={0};
+  DIR *d;
+  struct dirent *de;
+  uostr_xdup_cstr(&path,"/var/log");
+  uostr_x0(&path); /* terminate that \0 */
+  d=opendir(path.data);
+  uostr_cut(&path,-1); /* throw away that \0 */
+  uostr_xadd_char(&path,'/');
+  while ((de=readdir(d))!=NULL) {
+    size_t pos=path.len;
+    uostr_xadd_cstr(path,de->d_name);
+    uostr_x0(&path); /* terminate that \0 */
+    unlink(path.data); XXX do not run me!
+    uostr_cut(&path,pos);
+  }
+  closedir(d);
+  uostr_freedata(&path); 
+
+.SH ERROR HANDLING
+The 
+.I x
+functions will not return in case the run out of memory.
+
+.I uostr_{add,dup}_cstrmulti
+will return NULL if it cannot allocate more memory, but may already have
+changed the string.
+
+All other functions return NULL if they fail to allocate the memory they need and 
+will not touch the string.
+
+.SH "SEE ALSO"
+.I bugtraq 
+to see why overflow safe strings are useful.
+
+.SH COPYRIGHT
+Copyright 1998,1999 Uwe Ohse.
+.br
+This routines are published under the GNU
+General Public License,
+see
+.IR COPYING 
+for a full statement of rights and permissions.
+.SH AUTHOR
+Uwe Ohse

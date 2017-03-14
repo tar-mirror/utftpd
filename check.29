@@ -1,0 +1,64 @@
+#! /bin/sh
+
+test -f check..rcs || exit 77
+
+. $srcdir/check_lib
+check_start 29 "put (WRQ) of a checked in RCS file"
+# this checks that utftpd really checks the right files in and doesn't leave a
+# checked out file hanging around.
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write($CHECKDIR)
+default:rcs-ci($RCS_CI)rcs-co($RCS_CO)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for i in `cat check..rcs_few_files` ; do
+	cd $CHECKDIR/s
+	echo 123 >123
+	cp $wd/$i ./$i
+	echo 123 >$i.ro
+	$RCS_CI -q $i </dev/null
+	$RCS_CI -q $i.ro </dev/null
+	$RCS_CO -q -l $i </dev/null
+	echo 123 >$i
+	$RCS_CO -q  $i.ro </dev/null
+	cd $wd
+	do_test FAIL   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i    $i
+	# there now should a checked out file with the "123" content
+	if test "x$last_test_ok" = "x0" ; then
+		:
+	elif test -f $CHECKDIR/s/$i 2>/dev/null ; then
+        cd $CHECKDIR/s
+        if cmp $i 123 >/dev/null 2>/dev/null ; then
+            :
+        else
+            fail_after "checked out file has been overwritten"
+        fi
+        cd $wd
+	else
+		fail_after  "checked out file has vanished"
+	fi
+
+    do_test OK    ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i.ro    $i
+    # there now should be a RCS file with two revisions, no checked out copy
+    if test "x$last_test_ok" = "x0" ; then
+        :
+    elif test -f $CHECKDIR/s/$i.ro 2>/dev/null ; then
+        fail_after  "there exists a checked out file which should not be there"
+    else
+        cd $CHECKDIR/s
+        # 1.2 must exist
+        $RCS_CO -q -r1.2 $i.ro 2>/dev/null
+        out=`cmp $i.ro $wd/$i`
+        if test $? = 0 ; then
+            :
+        else
+            fail_after "RCS revision 1.2 differs from sent file: $out"
+        fi
+        cd $wd
+    fi
+done
+check_end

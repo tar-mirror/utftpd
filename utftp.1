@@ -1,0 +1,95 @@
+.TH utftp 1
+.SH NAME
+utftp \- a simple TFTP client
+.SH SYNOPSIS
+.B utftp
+[\fIoptions\fR] SERVER[:PORT] remote-file-name [local-file-name]
+.SH DESCRIPTION
+.B utftp 
+sends and receives files with the TFTP protocol.
+
+The default is to receive files. To change that use the 
+.I \-\-put 
+option, or rename the program so that it's name contains
+the three characters 
+.I "put"
+(or create a link: 
+.IR "ln utftp utftp-put" ).
+
+.SH OPTIONS
+.TP
+.B "\-b SIZE, \-\-blocksize SIZE" 
+try to use blocks of SIZE size instead of 512. Size may be between 512
+and 65464, but i don't believe something larger then 32768 will work
+(aside from that it wouldn't be that useful). Depending on you system
+you may not be able do get anything transfered with blocksizes as 
+low a 4096.
+
+Common UNIX tftp servers ignore all options. In that case 512 will be
+used, regardless of your wishes.
+
+.BR "Note" :
+this client is not intended for real use now. It logs all errors through
+syslogd, and it's interface is rather ugly. But you might find it useful
+anyway: it knows about the blocksize option.
+
+.TP
+.B "\-g, \-\-get" 
+get a file from the server.
+
+.TP
+.B "\-n, \-\-netascii" 
+Use 
+.I netascii
+conversion (this doesn't hurt, except for performance, and is not really useful).
+
+.TP
+.B "\-p, \-\-put" 
+put a file on the server.
+
+.TP
+.B "\-t TIMEOUT, \-\-timeout TIMEOUT" 
+use a timeout (for retries) of TIMEOUT seconds instead of 5. TIMEOUT
+must be between 1 and 255 inclusively.
+
+utftp will send an 
+.I timeout
+option to the server (to make it use the same timeout value), but
+common UNIX tftp servers ignore all options, in which case the server
+will still use a timeout of 5 seconds (usually).
+
+.PP
+In case i screwed something up:
+short options use the same arguments as the long ones
+
+.SH EXITCODES
+utftp will exit using one of the following exit codes:
+.TP
+.B "0"
+OK, action completed as requested.
+.TP
+.B "1"
+local error (out of memory, can't create/read file, and so on)
+.TP
+.B "2"
+usage error.
+.TP 
+.B "3"
+timed out.
+.TP
+.B "4"
+communication problem (TFTP protocol error).
+.TP
+.B "5"
+network problem.
+.TP
+.B "6"
+received some kind of 
+.I "error"
+(like access denied).
+.TP
+.B "7"
+undefined.
+
+.SH "SEE ALSO"
+RFC 1350, RFC 2349, RFC 2348.

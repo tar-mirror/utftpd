@@ -1,0 +1,30 @@
+#! /bin/sh
+
+if test "x$TFTP" = x ; then exit 77 ; fi
+. $srcdir/check_lib
+check_start 14 "put (WRQ) checking without conversion, using standard tftp client"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:create($CHECKDIR)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for i in ALL_FILES ; do
+	if test -f $i ; then
+		do_test OK   tftp <<EOF
+mode binary
+connect 127.0.0.1 $CHECKPORT
+put $i $CHECKDIR/s/$i
+quit
+EOF
+		out=`cmp $i $CHECKDIR/s/$i`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after  "$out"
+		fi
+	fi
+done
+check_end

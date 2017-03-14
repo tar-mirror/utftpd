@@ -1,0 +1,215 @@
+#! /bin/sh
+
+if test "x$CHECK_PORT" = x ; then
+	CHECKPORT=9000
+	export CHECKPORT
+fi
+if test "x$CHECKDIR" = x ; then
+	CHECKDIR=/tmp/check.utftpd.$$
+	export CHECKDIR
+fi
+BIN_FILES1="utftpd utftpd_make utftp"
+BIN_FILES2="utftpd.o libtftp.a miniudpserv"
+TXT_FILES1="Makefile config.log config.status"
+TXT_FILES2="config.h Specfile systype"
+ALL_FILES="$BIN_FILES1 $BIN_FILES2 $TXT_FILES1 $TXT_FILES2"
+FEW_FILES="$BIN_FILES1 $TXT_FILES1"
+if test "x$BLOCKSIZES" = x ; then
+	BLOCKSIZES="512 1024 1400 2048 4096 8192"
+fi
+
+check_prestart() {
+	mkdir $CHECKDIR || exit 1 
+	mkdir $CHECKDIR/s
+	mkdir $CHECKDIR/c
+}
+check_start() {
+	check_main="$1"
+	# $2 is useless text
+	echo "  $2"
+	shift
+	shift
+	standalone=0;
+	cs_options="-c $CHECKDIR/check.cdb"
+	if test "x$1" = "xNOCONFIG" ; then
+		shift;
+		cs_options=""
+	fi
+	if test "x$1" = "xSTANDALONE" ; then
+		cs_options="--standalone 127.0.0.1:$CHECKPORT $cs_options"
+		standalone=1;
+		shift
+	fi
+	cs_options="$cs_options $@"
+	if test -f "$CHECKDIR/check.cdb" ; then
+		:
+	else
+		mkdir $CHECKDIR || exit 1 
+		mkdir $CHECKDIR/s
+		mkdir $CHECKDIR/c
+	fi
+	mkdir $CHECKDIR/s/RCS # just in case this is an RCS check
+	mkdir $CHECKDIR/s/SCCS # just in case this is an SCCS check
+	if test "x$standalone" = x0 ; then
+		#strace -vs 1280 -fo /tmp/out \
+		./miniudpserv 127.0.0.1 $CHECKPORT -- ./utftpd $cs_options &
+	else
+		./utftpd $cs_options &
+	fi
+	minipid=$!
+	num_tests=0
+	num_fails=0
+	if test -f check..base_setup_done ; then return ; fi
+	cl_wd=`pwd`
+	mkdir $CHECKDIR/setup 
+	mkdir $CHECKDIR/setup/RCS
+	mkdir $CHECKDIR/setup/SCCS
+	if test "x$SCCS_DELTA" != x  -a "x$SCCS_GET" != x ; then 
+		cd $CHECKDIR/setup
+		check_start_sccs
+		cl_ret=$?
+		cd $cl_wd
+		if test "$cl_ret" = 1 ; then
+			echo $TXT_FILES1 $TXT_FILES2 >check..sccs_all_files
+			echo $TXT_FILES1 >check..sccs_few_files
+			touch check..sccs
+		else
+			echo "### Your SCCS system seems to be completely unusable." >&2
+			echo "### You should not put files which utftpd accesses under SCCS control." >&2
+		fi
+	fi
+	if test "x$RCS_CI" != x  -a "x$RCS_CO" != x ; then 
+		cd $CHECKDIR/setup
+		check_start_rcs
+		cl_ret=$?
+		cd $cl_wd
+		if test "$cl_ret" = 1 ; then
+			echo $TXT_FILES1 $TXT_FILES2 >check..rcs_all_files
+			echo $TXT_FILES1 >check..rcs_few_files
+			touch check..rcs
+		else
+			echo "### Your RCS system seems to be completely unusable." >&2
+			echo "### You should not put files which utftpd accesses under RCS control." >&2
+		fi
+	fi
+	touch check..base_setup_done
+}
+cleanup() {
+	rm -f check..*
+}
+sccs_create() {
+	for cl_i in $@ ; do
+		( $SCCS_DELTA -s -i $cl_i 2>/dev/null </dev/null \
+			|| sccs enter $cl_i </dev/null 2>/dev/null >/dev/null \
+			|| admin -i$cl_i SCCS/s.$cl_i </dev/null 2>/dev/null >/dev/null )
+		if test $? -ne 0 ; then
+			return 1
+		fi
+		rm -f $cl_i
+	done
+	return 0
+}
+# 0: SCCS is useless
+# 1: can be used for text files
+# 2: can be used for binaries, too.
+check_start_sccs() {
+	cp $cl_wd/Makefile check.txt
+	sccs_create check.txt
+	if test -f SCCS/s.check.txt ; then 
+		:
+	else
+		return 0
+	fi
+	$SCCS_GET -s -e SCCS/s.check.txt || return 0
+	if test -f check.txt ; then
+		:
+	else
+		return 0
+	fi
+	cp $cl_wd/config.log check.txt
+	$SCCS_DELTA -y -s SCCS/s.check.txt </dev/null
+	if test $? -ne 0 ; then
+		return 0
+	fi
+	# ok, it's somewhat usable
+	return 1
+
+}
+check_start_rcs() {
+	cp $cl_wd/Makefile check.txt
+	$RCS_CI -q check.txt  </dev/null
+	if test -f RCS/check.txt,v ; then 
+		:
+	else
+		return 0
+	fi
+	$RCS_CO -q -l check.txt
+	if test -f check.txt ; then
+		:
+	else
+		return 0
+	fi
+	cp $cl_wd/config.log check.txt
+	$RCS_CI -q check.txt </dev/null
+	if test $? -ne 0 ; then
+		return 0
+	fi
+	return 1
+}
+check_restart() {
+	sh -c "kill $minipid" >/dev/null
+	check_main="$1"
+	# $2 is useless text
+	echo "  $2"
+	shift
+	shift
+	if test "x$1" = "xNOCONFIG" ; then
+		shift;
+		cs_options="$@"
+	else
+		cs_options="-c $CHECKDIR/check.cdb $@"
+	fi
+	sleep 1; # give old miniudpserv and clients time to stop ...
+	./miniudpserv 127.0.0.1 $CHECKPORT -- ./utftpd -v $cs_options &
+	minipid=$!
+}
+check_end() {
+	sh -c "kill $minipid" >/dev/null
+	if test "$num_fails" = 0 ; then
+		rm -rf $CHECKDIR
+		exit 0;
+	else
+		echo "  $num_fails out of $num_tests subchecks failed"
+		echo "  see $CHECKDIR for details"
+		exit 1
+	fi
+}
+do_test() {
+	num_tests=`expr $num_tests + 1 `
+	do_test_expect="$1"
+	shift
+	if test $do_test_expect = "OK" ; then
+		do_test_expect=0;
+	else
+		if test "$do_test_expect" = "FAIL" ; then
+			do_test_expect=6;
+		# else preserve value
+		fi
+	fi
+	do_test_out=`$@ 2>&1`
+	test_result=$?
+	if test "$test_result" = $do_test_expect ; then
+		last_test_ok=1
+	else
+		last_test_ok=0
+		num_fails=`expr $num_fails + 1 `
+		echo "  sub check $check_main:$num_tests failed: $do_test_out"
+	fi
+}
+fail_after() {
+	if test "$last_test_ok" = 1 ; then
+		num_fails=`expr $num_fails + 1 `
+		echo "  sub check $check_main:$num_tests failed: $@"
+		last_test_ok=0
+	fi
+}

@@ -1,0 +1,82 @@
+0.2.4 - 1 November 1999
+
+* some cleanup and minor bug fixes
+* utftpd left SCCS lock files laying around in case of a failed put
+  request.
+
+0.2.3 - 5 September 1999
+
+* the server now ignores garbage bytes at the end of a packet, unless
+  there were tftp options.
+* "must not write as root" check moved some lines up, to check against
+  this before we create files (old version left 0 length files).
+
+0.2.2 - 22 August 1999
+
+* the server now uses adaptive timeout.
+* the server now unlinks the received file if it was not received 
+  completely.
+* the server now includes a workaround for the 
+  "Sorcerer's Apprentice Syndrome" (as it's called by RFC 1123)
+
+0.2.1 - 2 May 1999
+
+* rewrote configuration file handling. It's now much more 
+  beautiful. 
+  See sample.config for more information.
+  The old stuff partially continues to work, except that
+* the \ at the end of line (to split long lines into smaller pieces)
+  will not work anymore. Sorry for that, but it's just too much
+  pain to fix this.
+
+0.2.0 - 2 May 1999
+* understands a new experimental tftp option (revision).
+* major internal interface cleanup.
+* now reads version controlled files from a pipe. This means that
+  it now can serve read request even when the same file is just uploaded.
+* "lying around" copies of version controlled files will now be ignored.
+* -l option (GNU inetutils) is now recognized (and ignored,
+  utftpd logs by default).
+* -n option (GNU inetutils) implemented. It's used to suppress NAK
+  answers for "file not found". 
+* Can now operate without a configuration file, in a mode largely 
+  compatible with the traditional UNIX tftp server: Access control
+  based on a list of directories given on the command line and the
+  UNIX access bits (read/write for others). Therefore
+* it may now be used as a drop-in replacement for GNU inetutils tftpd.
+
+0.1.5 - 10 April 1999
+* added RCS support. See the utftpd.conf manual page for a description 
+  of the new configuration variables rcs-ci and rcs-co.
+* improved SCCS support: unchecked files will not be checked in 
+  (that's useful if your router saves his configuration regulary even 
+  if it's unchanged). See the utftpd.conf manual page for a 
+  description of the new configuration file variables sccs-clean and
+  sccs-unget.
+* improved checksuite to check SCCS/RCS handling.
+* fixed some small bugs.
+* improved compatibility (SCO 3.2v4.2, BSDI 3.1, Solaris 2.6 and 2.5.1,
+  OpenBSD 2.4/alpha, HPUX 9.00/m68k).
+
+0.1.4 - 5 April 1999
+* configuration (cdb) file may now reside outside the chrooted area.
+* understands RFC 2348 "blksize" option.
+* understands RFC 2349 "timeout" option (but doesn't know about "tsize" 
+  now).
+* test suite added.
+* documentation fixes.
+* server now knows about wildcards.
+* threw out some bugs and unused library files.
+* there's now a client program (utftp).
+
+0.1.3 - 28 March 1999
+* uh, 0.1.2 didn't work because of those stupid last-moment-large-rewrite ... 
+  Ok, that's why i tested it on my companies tftp server.
+* smaller log things.
+
+0.1.2 - 28 March 1999
+* manual pages
+* rpm fixed
+
+0.1.1 - 21 March 1999
+* put on cvs

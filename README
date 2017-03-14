@@ -1,0 +1,33 @@
+This is GNU utftpd, a replacement for the UNIX tftpd.
+
+utftpd is a server for the trivial file transfer protocol (TFTP)
+with finer grained access control then the standard UNIX tftpd. 
+See the file FEATURES for more blurb.
+I hope it will replace the tftpd of the GNU inetutils distribution.
+
+See the file NEWS for a list of major changes in the last releases.
+See http://www.nrw.net/uwe/utftpd.html for updates.
+See the file INSTALL for generic compilation and installation instructions.
+See the file USAGE for a quick & dirty usage guide. 
+
+Mail suggestions and bug reports for this package to
+<uwe-utftpd@bulkmail.ohse.de>, which is a mailing list you can subscribe
+to through a mail to <uwe-utftpd-subscribe@bulkmail.ohse.de>.
+
+
+utftp is Copyright (C)1999 Uwe Ohse <uwe@ohse.de>
+
+utftpd is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with utftpd as the file COPYING; if not, email me at the address
+above or write to the Free Software Foundation, 59 Temple Place -
+Suite 330, Boston, MA 02111-1307, USA.

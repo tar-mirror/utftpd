@@ -1,0 +1,577 @@
+1999-11-01    <uwe@akiar.ohse.de>
+
+	* configure.in: changed version number to 0.2.4
+
+	* Makefile.am:
+	* README.check: added check.44
+
+	* check.44: new file.
+
+	* utftpd.h: include unget method in vc struct.
+
+	* utftpd.c: call VC->unget and unlink the file
+	  if a PUT request failed.
+
+	* utftpd_rcs.c:
+	* utftpd_novc.c: dummy entries for unget method
+
+	* utftpd_recv.c: do not unlink the file anymore in case the 
+	  request failed. utftpd.c does that now.
+
+	* utftpd_sccs.c: provide unget method.
+
+1999-10-25    <uwe@serak.ohse.de>
+
+	* uoio.c: fixed error in buffer write code which could
+ 	  have lead to data corruption (highly unlikely to happen
+          in the case of utftpd, though).
+
+	* configure.in: inform the user which make program
+	  to use.
+
+	* utftp.c: opt_verbose did nothing, removed variable and
+	  option.
+
+	* Makefile.am: include check.43
+
+	* utftpd doesn't exit anymore if it can't make stdin
+	  nonblocking. That means standalone mode now works
+	  on OpenBSD.
+
+1999-09-05    <uwe@akiar.ohse.de>
+
+	* utftpd.c (do_init): ignore garbage bytes at the end of the
+	  packet, unless they come after options.
+
+	* tftplib.h: add send_garbage flag to struct tftplib_ctrl.
+
+	* utftp.c:
+	* tftp_prepare.c: 
+	  implement garbage sending (for test suite)
+
+	* check.42: check treatment of garbage bytes.
+
+	* configure.in: changed version number to 0.2.3
+
+1999-08-24    <uwe@serak.ohse.de>
+
+    * utftpd.c (do_init): move the check whether we write as "root" 
+      some lines up, before the possible creation of the files. 
+      Stupid buglet.
+
+1999-08-22  uwe  <uwe@serak.ohse.de>
+
+	* splitted tftplib.h in tftplib.h (client) and utftpd.h, to separate
+	  old struct tftplib_ctrl and new struct utftpd_ctrl (this way the
+	  server side is not clobbered if i add new debug/error provoking
+	  stuff the the client).
+
+	* utftpd_nak.c: new file
+
+	* tftp_receive: implement --force-timeout stuff.
+
+	* tftp_send: implement --force-timeout stuff.
+
+	* tftplib.h: struct tftplib_ctrl now has new member force_timeout.
+
+	* utftp.c: implement --force-timeout stuff.
+
+	* utftpd*.c: use utftpd.h instead of tftplib.h, use utftpd_nak
+	  instead of tftp_nak.
+
+	* utftpd.c: new function utftpd_setup_ctrl(). (Clone of 
+	  tftp_setup_ctrl from the client library). Use that.
+
+	* utftpd_recv.c: rename got_timeout to got_timeouts, since utftpd_send
+	  names it so. Use adapative timeout.
+	  unlink new file in case we didn't get it completely.
+
+	* utftpd_send.c: use adaptive timeout.
+	  implement a fix for "Sorcerer's Apprentice Syndrome". It's a bit
+	  smarter than suggested by RFC 1123.
+
+1999-07-07  uwe  <uwe@serak.ohse.de>
+
+	* all: package compiles with g++.
+
+	* Makefile.am: include no_tftp.h into noinst_HEADERS.
+
+	* cdb_seek.c:
+	* cdb_unpack.c:
+	* cdbmake.h:
+	* cdb.h: change some char * to unsigned char *.
+
+	* configure.in: change version number to 0.2.2.
+
+	* miniudpserv.c: adapt to changes in uogetopt.h.
+	  struct sockaddr_in s_in moved to main().
+
+	* utftpd.c: adapt to changes in uogetopt.h.
+	  struct sockaddr_in s_in moved to main().
+	  some casts to make g++ happy.
+
+	* utftpd_dump.c: some casts to make g++ happy.
+	  main returns int.
+
+	* utftpd_make.c: adapt to changes in uogetopt.h.
+	  some casts to make g++ happy.
+	  allocate cdbm dynamically.
+
+	* utftp.c: adapt to changes in uogetopt.h.
+	  opt_verbose is now not longer static (clashed with
+	  extern declaration in header file).
+
+	* parser.y: properly initialize all members of this_string.
+	  some casts to make g++ happy.
+
+	* tftp_s_ctrl.c: some casts to make g++ happy.
+
+	* utftpd_sccs.c: some casts to make g++ happy.
+
+	* str2num.h:
+	* str_ulong.c:
+	* str_ulong.h:
+	* parse_ipport.c:
+	* timing.c:
+	* uogetopt.c:
+	* uogetopt.h:
+	* uogetopt.3:
+	* uoio.c:
+	* uosock.h:
+	* uostr.c:
+	* uostr_mem.c:
+	* uostr.h:
+	* nonblock.h:
+	* nonblock.c: library updates.
+
+1999-06-15  uwe  <uwe@serak.ohse.de>
+
+	* utftpd.c: syslog() for configuration variables only if verbose,
+	  and changed text of that.
+
+1999-05-23  uwe  <uwe@serak.ohse.de>
+
+	* configure.in: check for yacc.
+
+	* utftpd_make.c: mostly rewritten.
+
+	* Makefile.am:
+	new files and rules for: check.41, utftpd_dump.c, parser.y
+
+	* utftpd.c:
+	change in rule format: read(..)write(..) -> read=..NULwrite=..NUL
+
+	* parser.y: new file
+
+	* .cvsignore, Makefile.in, configure, parser.c:
+	*** empty log message ***
+
+	* utftpd_make.h: new file
+
+	* utftpd.conf.5, sample.config: updated
+
+	* check.41, uostr.3, uostr.c, uostr.h, uostr_char.c:
+	*** empty log message ***
+
+	* utftpd_dump.c: new file
+
+	* Makefile.am, Makefile.in, uogetopt.3, uogetopt.c, uogetopt.h, utftpd.c:
+	improved uogetopt: UOGO_PRINT, UOGO_HIDDEN, manual page, copyright stuff
+
+1999-05-22  uwe  <uwe@serak.ohse.de>
+
+	* utftpd.c: adapted to new uogetopt version.
+
+	* uogetopt.c: updated.
+	* uogetopt.h: updated.
+	* uogetopt.3: new file.
+
+1999-05-02  uwe  <uwe@serak.ohse.de>
+
+	* timing.c, timing.h, Makefile.am, check_extra.1, tftplib.h, utftpd.c, utftpd_recv.c, utftpd_send.c, Makefile.in:
+	timing stuff
+
+	* utftpd.c: implemented UNIX tftpd style access control:
+	1. check filename against a list of directories on the command line
+	2. check st_mode field for "readable/writable by anyone".
+
+	* check_lib:
+	added check_restart() function to kill udpserv and restart it with new options
+
+	* NEWS, README.check, utftpd.8: updated
+
+	* Makefile.am: added check.40, check.39
+
+	* check.39, check.40: new tests for old style access control
+
+1999-05-01  uwe  <uwe@serak.ohse.de>
+
+	* ChangeLog, configure, configure.in: changed version number to 0.2.0
+
+	* utftpd_send.c, utftpd_recv.c:
+	adapted to changes in global version control interface: doesn't open the file anymore, leaves that to vc stuff
+
+	* utftpd_sccs.c, utftpd_rcs.c:
+	cleaned up interface, checkout for reading using pipes
+
+	* utftpd_make.c: hacked around efence
+
+	* utftpd.c:
+	wrapped version control stuff, hacked around efence, support 'revision' tftp option and --suppress-naks option
+
+	* utftp.c:
+	revision and retries options, changed exit code (see tftlib.h changes)
+
+	* utftp.1: *** empty log message ***
+
+	* uoio.c: cleaned up
+
+	* tftplib.h:
+	struct tftp_ctrl now includes "retries" (used in the client code),
+	"revision" (client + server code), "filename", "origfilename,"
+	"filefd", "pid" and "vc" fields (the last 5 are only used in the
+	server).
+	define struct utftpd_vc (version control interface).
+	declare utftpd_sccs, utftpd_rcs, utftpd_novc version controls.
+	changed lots of prototypes.
+	declare opt_verbose and opt_suppress_naks
+
+	* tftp_s_ctrl.c: initialize filefd to -1, retries to 5
+
+	* tftp_send.c: changed return codes, see tftplib.h change
+
+	* tftp_receive.c:
+	changed return codes, see tftplib.h change, remove #if 0'ed code
+
+	* tftp_prepare.c: revision option supported
+
+	* miniudpserv.c: hack around efence
+
+	* check_lib:
+	passing of options to utftpd possible, numeric expect values possibly, FAIL translates to 6
+
+	* check.30:
+	heavily modified to check what happens if there is a checked out copy
+
+	* check.27, check.17:
+	reversed the check since the logic in the code has been changed
+
+	* Makefile.in, README.check: *** empty log message ***
+
+	* Makefile.am: included new checks and new source files
+
+	* check.34, check.35, check.36, check.37, check.38: New checks
+
+	* utftpd_novc.c: New file: a dummy version control interface
+
+	* wait_check.c: New file: waitpid()+check exitstatus +logging
+
+1999-05-01  uwe  <uwe@serak.ohse.de>
+
+	* utftpd_send.c, utftpd_recv.c:
+	adapted to changes in global version control interface: doesn't open the file anymore, leaves that to vc stuff
+
+	* utftpd_sccs.c, utftpd_rcs.c:
+	cleaned up interface, checkout for reading using pipes
+
+	* utftpd_make.c: hacked around efence
+
+	* utftpd.c:
+	wrapped version control stuff, hacked around efence, support 'revision' tftp option and --suppress-naks option
+
+	* utftp.c:
+	revision and retries options, changed exit code (see tftlib.h changes)
+
+	* utftp.1: *** empty log message ***
+
+	* uoio.c: cleaned up
+
+	* tftplib.h:
+	struct tftp_ctrl now includes "retries" (used in the client code),
+	"revision" (client + server code), "filename", "origfilename,"
+	"filefd", "pid" and "vc" fields (the last 5 are only used in the
+	server).
+	define struct utftpd_vc (version control interface).
+	declare utftpd_sccs, utftpd_rcs, utftpd_novc version controls.
+	changed lots of prototypes.
+	declare opt_verbose and opt_suppress_naks
+	Define exit codes for tftp client.
+
+	* tftp_s_ctrl.c: initialize filefd to -1, retries to 5
+
+	* tftp_send.c: changed return codes, see tftplib.h change
+
+	* tftp_receive.c:
+	changed return codes, see tftplib.h change, remove #if 0'ed code
+
+	* tftp_prepare.c: revision option supported
+
+	* miniudpserv.c: hack around efence
+
+	* check_lib:
+	passing of options to utftpd possible, numeric expect values possibly, FAIL translates to 6
+
+	* check.30:
+	heavily modified to check what happens if there is a checked out copy
+
+	* check.27, check.17:
+	reversed the check since the logic in the code has been changed
+
+	* Makefile.in, README.check: *** empty log message ***
+
+	* Makefile.am: included new checks and new source files
+
+	* check.34, check.35, check.36, check.37, check.38: New checks
+
+	* utftpd_novc.c: New file: a dummy version control interface
+
+	* wait_check.c: New file: waitpid()+check exitstatus +logging
+
+1999-04-12  uwe  <uwe@serak.ohse.de>
+
+	* utftpd_send.c, wildmat.c, wildmat.h, cdb_hash.c, cdb_seek.c, cdbmake_add.c, cdbmake_hash.c, cdbmake_pack.c, miniudpserv.c, tftp_receive.c, tftp_send.c, tftplib.h, uogetopt.c, uoio.h, utftp.c, utftpd_make.c, utftpd_recv.c:
+	Pre-Ansi-modifications where necessary
+
+	* check.20, check.26, check.27, check.28, check.29, check.30, check.31, 
+	  check.32, check.33, check.4, check.5, check_lib, check.12, check.13:
+	fix SCCS things, make BLOCKSIZES configurable ($BLOCKSIZES="512 1024").
+
+1999-04-11  uwe  <uwe@serak.ohse.de>
+
+	* check_lib: fix admin usage
+
+	* check.16, check.17, check.18, check.19, check.20, check.21, check.22, 
+	  check.23, check.24, check.25, check_lib:
+	just another way to create SCCS files: the admin tool (SCO 4.2).
+
+1999-04-10  uwe  <uwe@serak.ohse.de>
+
+	* utftpd_make.c: indent ran for ansi2knr
+
+	* uostr_mem.c: made HPUX 9.00 pre-ANSI cc happy which complained:
+	'default' should appear at most once in 'switch'
+	"default:" -> "case 0:", which is the same here.
+
+	* README.check: new file.
+
+	* configure.in, configure: always use efence on serak
+
+	* check.28, check.29, check.3, check.30, check.31, check.32, check.33, 
+	  check.4, check.5, check.6, check.7, check.cleanup, check_lib, 
+	  check.12, check.13, check.14, check.15, check.16, check.17, check.18, 
+	  check.19, check.2, check.20, check.21, check.22, check.23, check.24, 
+	  check.25, check.26, check.27, Makefile.am, Makefile.in, README.check, 
+	  check.10, check.11:
+	try to deal with version control system which do not handle binaries
+
+	* check_lib:
+	call external kill executable to stop some shells from whining about 
+	killed children
+
+	* systype.in:
+	SCO support, fallback to /sbin/sysctl on BSD systems if it is not in PATH
+
+	* tftp_receive.c, tftp_send.c:
+	removed some warning with (struct sockaddr *) cast
+
+	* utftpd.c: used memory freed in 'blocksize' processing
+
+	* utftpd.8: update.
+	
+	* utftpd.c: removed c++ style comments.
+
+	* utftpd_rcs.c, utftpd_recv.c, utftpd_sccs.c, miniudpserv.c, 
+	  tftp_receive.c, tftp_send.c, utftpd.c:
+	solaris 2.6, warnings removed
+
+	* tftp_prepare.c, tftp_receive.c, utftpd.c, utftpd_make.c: removed
+	warnings under SCO 4.2
+
+	* utftpd_recv.c, tftp_receive.c, utftpd_make.c:
+	deal with missing fsync()
+
+	* utftpd.c:
+	slowlartis 5.5.1 does have th_u union in tftp header structure
+
+	* check.26, check.31: don't use 'test !' anymore, it's unportable
+
+	* check.16, check.17, check.18, check.19, check.20, check.21, check.22, 
+	check.23, check.24, check.25:
+	adapted to SUNs aged sccs systems on slowlaris 5.5.1
+
+	* utftpd_sccs.c:
+	now give SCCS/s.file as argument to sccs commands instead of 'file' alone
+
+	* check_lib: make functions in bourne style
+
+1999-04-09  uwe  <uwe@serak.ohse.de>
+
+	* uogetopt.c:
+	fixed length of some help strings, added option to check length of help texts
+
+	* utftpd.c: fixed length of some help strings
+
+	* uogetopt.c: do not include uostr.h
+
+	* utftpd.conf.5: updated for new configuration variables
+
+	* configure, configure.in:
+	updated version to 0.1.5.
+	check for RCS programs co and ci.
+	check for SCCS programs get, delta, unget (standard) and clean (BitSCCS).
+
+	* check.26, check.27, check.28, check.29, check.30, check.31, check.32, check.33:
+	new files, checks for the RCS stuff.
+	
+	* check.16, check.17, check.18, check.19, check.20, check.21, check.22, check.23, check.24, check.25:
+	new files, checks for the SCCS stuff.
+
+	* Makefile.am:
+	miniudpserv needs LIBOBJS
+	include new files utftpd_rcs.c and utftpd_sccs into utftpd. Add lots of checks.
+
+	* utftpd_recv.c:
+	don't send last ACK anymore, high level has to do that due to revision control
+	checkin.
+
+	* utftpd_sccs.c: new file
+
+	* utftpd_rcs.c: new file
+
+	* utftpd.c: 
+	opt_sccs_unget, opt_sccs_clean, opt_rcs_ci, opt_rcs_co: new configuration file variables
+	check wether sccs delta failed if we commit a writable file we found.
+	send last ACK for a received file after sccs commit.  call setsid(). 
+	moved SCCS handling code to utftpd_sccs.c. added bugs report email address to
+	help text. Slightly improved help texts.
+
+	* utftp.c: workaround for missing LOG_PERROR
+	added bugs report email address to help text.
+
+	* utftpd_make.c: added bugs report email address to help text.
+
+	* tftplib.h: prototypes for functions in utftpd_sccs.c, utftpd_rcs.c.
+	declarations of global variables needed in those two files.
+
+	* uogetopt.c: make --help/longhelp work on --help, --longhelp, --version.
+
+1999-04-06  uwe  <uwe@serak.ohse.de>
+
+	* systype.in:
+	openbsd added. don't print error messages if config.guess is missing
+
+1999-04-05  uwe  <uwe@tirka.ohse.de>
+
+	* check.14, check.15, check.6, check.7:
+	fix checks for the 'no standard tftp client' case
+
+1999-04-05  uwe  <uwe@iniur.ohse.de>
+
+	* tftp_s_ctrl.c:
+	should have assigned the value to a union member, not the union
+
+	* check.4, check.5, check.1, check.12, check.13:
+	some portability fixes for the checks
+
+	* utftpd_send.c:
+	check whether the file is a regular file and not a directory
+
+	* check_lib: syntax fix
+
+1999-04-05  uwe  <uwe@serak.ohse.de>
+
+	* utftp.1: new manual page
+
+	* utftpd.8, utftpd.c: open configuration file before chroot()
+
+	* .cvsignore: miniudpserv and utftp added
+
+	* miniudpserv.c: new file: a simple inetd replacement for use in 'make check'
+
+	* Makefile.am: lots of additions.
+	
+	* utftpd.c: lots of changes. parts moved out into other files, especially
+	  utftpd_recv.c and utftpd_send.c. redid access rights checking. cleaned up.
+	
+	* utftpd.conf.5: new manual page describing the configuration file format.
+
+	* utftp.c: new file: simple tftp client
+
+	* wildmat.c: my address fixed.
+
+	* tftp_f_ctrl.c, tftp_nak.c, tftp_prepare.c, tftp_receive.c, tftp_s_ctrl.c, tftp_send.c, tftplib.h:
+	new tftp library functions, for use in the client (tftp_nak is also used in the server).
+
+	* utftpd_recv.c, utftpd_send.c:
+	new files, implementing the server side 'file send/receive' functions, moved out of utftpd.c
+
+	* check.1, check.10, check.11, check.12, check.13, check.14, check.15, check.2, 
+	* check.3, check.4, check.5, check.8, check.9, check_lib:
+	self check adjusted.
+
+1999-04-04  uwe  <uwe@serak.ohse.de>
+
+	* check.6, check.7, check_lib, check.1, check.2, check.3, check.4, check.5:
+	selfcheck part 1
+
+	* str_ulong.h: illegal ; at end of define removed.
+
+	* uoio.c:
+	two stupid bugs fixed which basically lead to only the first 8192 bytes being used in most circumstances
+
+	* NOTES: new file
+
+	* utftpd_make.c: comma-separation of IP addresses didn't work
+
+1999-04-02  uwe  <uwe@serak.ohse.de>
+
+	* cdb_hash.c, cdb_seek.c, cdb_unpack.c, cdbmake.h, cdbmake_add.c, cdbmake_hash.c, cdbmake_pack.c, utftpd_make.c:
+	Copyright notices added
+
+	* utftpd.conf.5: new file
+
+	* Makefile.am, Makefile.in, utftpd.8, utftpd.c, utftpd_make.8:
+	documentation update
+
+	* config.h.in, configure, utftpd_make.c:
+	don't append a space before continuation lines
+
+	* configure.in, Makefile.in:
+	change version number to 0.1.4, don't check for resolver library anymore
+
+	* Makefile.am, uo_now.c: whole time library is not needed
+
+	* uo_dt2sec70.c: uo_dt2sec70.c is not needed
+
+	* uo_sec702dt.c: uo_sec702dt.c is not needed
+
+	* uo_monabbrev.c, Makefile.am: uo_monabbrev.c is not needed
+
+	* Makefile.in, utftpd.c, utftpd_make.c, wildmat.c, wildmat.h, ChangeLog, Makefile.am:
+	check_access() now knows about wildcards
+
+	* Makefile.in, utftpd_make.c, Makefile.am: continuation lines
+
+1999-03-28	Uwe Ohse  <uwe@ohse.de>
+	* all: Version 0.1.3
+	* utftpd.8: new
+	* utftpd.c: inet_ntoa for remote ip is now only called once,
+	  the result will be bufferd. 
+	  Fix sendbuf and recvbuf changes from a week before. I *knew*
+	  something was not OK that day ...
+      check_access() allows not not only access to /XXX/* for any
+      configured /XXX, but also to /XXX itself.
+	  openlog() with LOG_NDELAY.
+	  syslog() if sccs-delta fails.
+	* utftpd_make.c: 
+	  open tmpfile 0644, that is: read/write for anybody.
+
+1999-03-21  Uwe Ohse  <uwe@ohse.de>
+
+* uostr_mem.c: shut up compiler warning
+
+* utftpd.c (everythere): change sendbuf and recvbuf to unions, to get rid
+  of compiler warnings about alignment differences.
+
+* utftpd_make.c: fix an alpha compilation warning.
+

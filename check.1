@@ -1,0 +1,21 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 1 "read access rights checking"
+
+# setup configuration file
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read($CHECKDIR/s/123:$CHECKDIR/s/124:$CHECKDIR/s/2*)
+EOF
+echo 123 >$CHECKDIR/s/123
+mkdir     $CHECKDIR/s/124
+echo 124 >$CHECKDIR/s/124/124
+echo 125 >$CHECKDIR/s/125
+echo 221 >$CHECKDIR/s/221
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/123     $CHECKDIR/c/1  # should work: allowed access to s/123
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/124     $CHECKDIR/c/2  # should not work: is a directory
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/124 $CHECKDIR/c/3  # should work: allowed access to s/124
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/125     $CHECKDIR/c/4  # should not work: access denied
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/221     $CHECKDIR/c/5  # should work: see wildcard above
+check_end

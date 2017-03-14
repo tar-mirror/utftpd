@@ -1,0 +1,299 @@
+.TH utftpd.conf 5
+.SH NAME
+utftpd.conf \- rules for utftpd
+.SH DESCRIPTION
+.B utftpd.conf 
+containes rules for utftpd. It cannot be used by utftpd directly, but needs
+to be converted through use of utftpd_make(8).
+.SH FORMAT
+Empty lines in the input are ignored, as are lines which start with a
+hash sign (#). All other lines may either be 
+.I V1
+format definitions (compatability to versions <0.2.1, see below), class definitions
+or client definitions.
+
+V1 and V2 format may be intermixed, although i suspect that this will not look too beautiful. 
+
+V1 is described in an own section. All other sections deal with the V2 format.
+.SH "CLASS DEFINITION"
+Classes (which other people may or may not call templates) allow to define defaults variable assignments:
+
+.br
+.nf
+      class read_ok {
+      	read="/tmp"
+      }
+.fi
+.br
+
+Classes may inherit from other classes:
+
+.nf
+      class write_ok { write="/tmp" }
+      # a class which only inherits:
+      class readwrite_ok: read_ok,write_ok;
+      class readwrite_ok2: read_ok {write="/tmp";}
+.fi
+.br
+
+The second and third class are identical.
+
+It's possible to assign more than one variable to a class:
+
+.nf
+      class rcs { rcs-co=/bin/co; rcs-ci=/bin/ci }
+.fi
+
+Here is something which doesn't work:
+
+.nf
+      class base {read="123";}
+      class c1:base { read+="456" }
+      class c2: { read="789" }
+	  class conflict:c1,c2;
+.fi
+
+`c1' and `c2' conflict: both define  `read'. There is no simple and clean solution to this problem.
+.SH "CLIENT DEFINITION"
+A
+.I client definition
+consists of an address specification, optional class defintions,
+and variable assignments.
+An example:
+
+.nf
+      class base { 
+        base="/tftpboot"; 
+        images="${base}/images/"; 
+        config="${base}/config/"
+      }
+      # allow read access to the own config file and the images directory.
+      class read_ok { read="${config}${name}:${images}"; }
+      # allow write access to the own config file.
+      class readwrite_ok:read_ok { write="${config}${name}"; }
+      # also allow read access to /etc. Don't do that in real life, every user can
+      # use tftp clients ...
+      class etc_ok { read+=":/etc/"; } 
+      client 127.0.0.1: readwrite_ok { name="localhost"}
+      client 194.245.80.2:readwrite_ok,etc_ok { name="tirka"}
+.fi
+.br
+.SH "STRING REPLACEMENTS"
+The 
+.I "${base}"
+thing you can see above will be replaced by the value of the variable 
+.IR base .
+It's an error if that variable is undefined, utftpd_make will stop.
+
+String replacements are done before the strings get written to the configuration 
+database, not in the daemon. Therefore there is no chance to replace something
+by a client IP address.
+.SH "VARIABLE ASSIGNMENT"
+There are three forms of variable assignments:
+
+.SS "Simple 'var = value' assignments"
+utftpd_make will stop if the variable is already defined.
+.SS "'override var = value' assignments"
+utftpd_make will override a old value (if any) with the new one, otherwise
+it will create the variable.
+.SS "'var += value' assignments"
+utftpd_make will append the new value to an old one (if the variable
+is not already defined it will be created, 
+.I `+='
+then is equal to a
+.I `='
+assignment.
+.SH "ADDRESSES"
+Adresses may be spefified as follows:
+
+.EX
+      127.0.0.1
+.br
+127.
+.br
+      194.245.80.2
+.br
+      194.245.80.2/28
+.br
+      194.245.80.2-5
+.br
+      194.245.0.0/16
+.br
+      194.176.0-31.
+.br
+      default
+.EE
+
+Be careful with the 
+.I /
+masks: The slash makes utftpd_make create on entry in the database file for every ip address matches.
+.I "194.245.0.0/16" 
+stands for 65536 addresses, and is certainly a waste of disk space.
+
+The dash also creates one entry for each match, but 
+.I "194.176.0-31." 
+only creates 32 entries.
+
+Please note that only the first entry in configuration file which matches a given IP address
+is used. This does not work (but will silently fail, not lead to an error message):
+
+.EX
+      # 194.245.80.2 may write
+.br
+      client 194.245.80.2 {write="/"; }
+.br
+      # allow the whole 194.245.80.* to read
+.br
+      client 194.245.80. {read="/";}
+.br
+.EE
+
+.B "194.245.80.2 will only be able to write, _not_ to read."
+I consider this a feature: TFTP knows no security at all, so i 
+force you to tell the daemon exactly what to allow. Please note
+that you should never give read or write access to your root
+directory.
+
+utftpd_make dislikes duplicate addresses.
+.SH "RECOGNIZED VARIABLES"
+utftpd recognizes the following variables in the configuration file:
+
+.B "chroot"
+change working and root directory to the value. Note that utftpd needs to have
+to necessary rights to do so (this probably means it has still run under root.
+Use the
+.I uid
+feature to change that. You should 
+.B not
+let utftpd run as root.)
+
+.B "dir"
+change working directory. This just changes the way utftpd interprets 
+relative file names (those starting without a /) it receives from clients.
+Note that you have to specify full paths for the access configuration
+variables (below) anyway: utftpd uses full qualified file names internally.
+
+.B "uid"
+change user/group ID to the value (which may be a name or a number. Note
+that, in case of a global chroot, see the 
+.B utftpd 
+manual page, the system passwd may not be available anymore).
+
+.B "read"
+specifies a list of directories or the daemon may read. Entries are
+separated by colons (as in $PATH). This may use wildcards.
+
+.B "write"
+specifies a list of directories or files the daemon may overwrite.  This may use wildcards.
+
+.B "create"
+specifies a list of directories the daemon may create files in, or files the daemon
+may create. Note
+that the create list does not include the write list (or vice versa). This may use wildcards.
+
+.B "sccs-get"
+contains the path to the 
+.I "get"
+command of the SCCS system.
+
+.B "sccs-delta"
+contains the path to the 
+.I "delta"
+command of the SCCS system. If both are given and a SCCS version of a requested file
+exists then 
+.B utftpd
+will try to use SCCS.
+
+.B "sccs-unget"
+contains the path to the 
+.I "unget"
+command of the SCCS system. If this and 
+.I "sccs-clean"
+are missing then utftpd will check in unchanged files. In other words: If one or both
+of those options are given utftpd will try to not check in unchanged files under SCCS
+control. This can be an important feature if, for examples, your routers automatically
+save their configuration to a tftp server every night.
+
+.B "sccs-clean"
+contains the path to the 
+.I "clean"
+command of the SCCS system (this seems to be non-standard). See
+.I "sccs-unget"
+for a description.
+
+.B "rcs-ci"
+contains the path to the 
+.I "ci"
+command of the RCS system.
+
+.B "rcs-co"
+contains the path to the 
+.I "co"
+command of the RCS system. If both are given and a RCS version of a requested file
+exists in a RCS subdirectory (meaning RCS/file,v) then 
+.B utftpd
+will try to use RCS. 
+
+SCCS will be preferred over RCS if both are found.
+A good place to set the revision control variables is the 
+.I "default"
+target.
+.SH "RESOLVING"
+When utftpd looks for a configuration variable it will first look for that 
+variable in a cdb entry for 
+.I 1.2.3.4
+(e.g., the IP address of the client), then in an entry for
+.IR 1.2.3. ,
+then 
+.IR 1.2. ,
+then
+.IR 1. ,
+and then
+.IR default .
+
+Only the first occurance of a variable will be honored.
+
+Given the following example:
+
+.EX
+      client 194.245.80.2 {
+        dir="/ohse.de/tirka" ; 
+        read=${dir}; write=${dir}; create=${dir};
+      }
+      client 194.245.80. {
+        read="/ohse.de" ; 
+      }
+      client default { read="/tmp" }
+.EE
+
+
+The machine
+.I 194.245.80.2
+may read, write or create the file 
+.I "/ohse.de/tirka" 
+or may read, write or create files in a directory with the same name (if that directory exists, of course).
+It will not be able to read a file
+.IR "/ohse.de/serak" ,
+which all other machines of the 194.245.80.* range are able to do. Everyone else except the 194.245.80.* range may read
+from /tmp.
+.SH "V1 FORMAT"
+V1 format is deprecated. It may vanish some day, and is left just for
+compatibility with versions of utftpd prior to 0.2.1.
+
+V1 format definitions end at the end of the line. They
+consist of an address specification (identical to the format
+used now), a colon, and one or many variable assignments.
+
+Each assignment consists of a list of variables, each separated with a comma,
+which are followed by a pair of parenthesis containing the value to be
+assigned (to each of that "list of variables") between them, after which other variable names may follow:
+
+.EX
+address-specification: VAR11[,VAR12[,VAR13 ...]] ( value ) [VAR21[,VAR22[,VAR23 ...]] ( next value ) ...]
+.EE
+
+(really all on one line, please).
+
+.SH "SEE ALSO"
+utftpd(8),
+utftpd_make(8)

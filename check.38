@@ -1,0 +1,13 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 2 "get (RRQ), checking --suppress-naks option" "--suppress-naks"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read(/)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+do_test 3   ./utftp --get --timeout 1 --retries 1 127.0.0.1:$CHECKPORT ./XXX $CHECKDIR/c/XXX
+check_end

@@ -1,0 +1,53 @@
+#! /bin/sh
+
+test -f check..sccs || exit 77
+
+. $srcdir/check_lib
+check_start 19 "put (WRQ) of a checked in SCCS file"
+# this checks that utftpd really checks the right files in and doesn't leave a
+# checked out file hanging around.
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write($CHECKDIR)
+default:sccs-get($SCCS_GET)sccs-delta($SCCS_DELTA)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+
+for i in `cat check..sccs_few_files` ; do
+	cd $CHECKDIR/s
+	cp $wd/$i ./$i
+	echo "difference" >>$i
+	sccs_create $i
+	cd $wd
+	do_test OK   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i    $i
+	# there now should be a SCCS file with two revisions, but no checked out copy
+	if test "x$last_test_ok" = "x0" ; then
+		:
+	else
+		if test -f $CHECKDIR/s/$i 2>/dev/null ; then
+			fail_after  "there exists a checked out copy which should not be there"
+		else
+			cd $CHECKDIR/s
+			$SCCS_GET -s -r1.2 SCCS/s.$i
+			out=`cmp $i $wd/$i`
+			if test $? = 0 ; then
+				$SCCS_GET -s -r1.1 SCCS/s.$i
+				cp $wd/$i $i.cmp
+				echo "difference" >>$i.cmp
+				out=`cmp $i.cmp $i`
+				if test $? = 0 ; then
+					:
+				else
+					fail_after "SCCS revsion 1.1 differs from original file: $out"
+				fi
+			else
+				fail_after "SCCS revision 1.2 differs from sent file: $out"
+			fi
+			cd $wd
+		fi
+	fi
+done
+check_end

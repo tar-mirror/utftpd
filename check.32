@@ -1,0 +1,32 @@
+#! /bin/sh
+
+test -f check..rcs || exit 77
+
+. $srcdir/check_lib
+check_start 32 "put (WRQ) write access check of RCS file"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write($CHECKDIR/s/1:$CHECKDIR/s/2)
+default:rcs-ci($RCS_CI)rcs-co($RCS_CO)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+cd $CHECKDIR/s
+cp $wd/Makefile ./1
+cp $wd/Makefile ./2
+cp $wd/Makefile ./3
+cp $wd/Makefile ./4
+$RCS_CI -q  1 </dev/null
+$RCS_CI -q  2 </dev/null
+$RCS_CI -q  3 </dev/null
+$RCS_CI -q  4 </dev/null
+$RCS_CO -q -l 2
+$RCS_CO -q -l 4
+cd $wd
+do_test OK    ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/1    config.log
+do_test FAIL  ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/2    config.log
+do_test FAIL  ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/3    config.log
+do_test FAIL  ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/4    config.log
+check_end

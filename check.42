@@ -1,0 +1,20 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 42 "junk bytes at the end of the init packet"
+
+# setup configuration file
+cat >$CHECKDIR/check.conf <<EOF
+client 127.0.0.1/32 { create="$CHECKDIR/s";
+                      read="$CHECKDIR/s/";
+					  write="$CHECKDIR/s/"}
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+do_test OK   ./utftp -G --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/1       \
+	./utftp  # should work: allowed access to s/
+do_test OK   ./utftp -G --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/1       \
+	$CHECKDIR/c/1  # should work: allowed access to s/
+do_test FAIL ./utftp -R 1 -b 1024 -G --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/2 \
+	./utftp  # should not work: garbage together with options not allowed.
+
+check_end

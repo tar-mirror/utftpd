@@ -1,0 +1,5 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+cleanup
+exit 77

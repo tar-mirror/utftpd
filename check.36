@@ -1,0 +1,37 @@
+#! /bin/sh
+
+if test "x$RCS_CO" = x -o "x$RCS_CI" = x ; then exit 77 ; fi
+. $srcdir/check_lib
+check_start 36 "put (WRQ) checking, trying to create a new RCS revisions"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read,write($CHECKDIR)
+default:rcs-co($RCS_CO)rcs-ci($RCS_CI)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+cd $CHECKDIR/s
+echo 1vers1 >check1.txt
+$RCS_CI -q  check1.txt </dev/null # 1: 1.1
+
+cd $wd
+echo "1vers2" >$CHECKDIR/c/check1.txt
+do_test OK   ./utftp --put --revision 1.4 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+echo "1vers3" >$CHECKDIR/c/check1.txt
+do_test OK   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+do_test OK   ./utftp --get --revision 1.4 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+echo "1vers2" >$CHECKDIR/c/cmp
+out=`diff $CHECKDIR/c/cmp $CHECKDIR/c/check1.txt`
+if test $? -ne 0 ; then
+	fail_after "didn't get my revision 1.4 out of RCS: $out"
+fi
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+echo "1vers3" >$CHECKDIR/c/cmp
+out=`diff $CHECKDIR/c/cmp $CHECKDIR/c/check1.txt`
+if test $? -ne 0 ; then
+	fail_after "didn't get my last revision out of RCS: $out"
+fi
+
+check_end

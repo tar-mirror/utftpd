@@ -1,0 +1,18 @@
+This file describes the features GNU utftpd has.
+
+1. support for IP based access control.
+   utftpd can assign the right to read, create or overwrite a file
+   (or files in a directory) on a per-host base.
+2. support for revision control.
+   utftpd can checkin/out files under SCCS or RCS version control.
+   This was one of the main reasons to write it: version control is
+   the easiest way to restore the configuration our IP routers 
+   (Ascends, Ciscos) had yesterday or some weeks ago.
+   This is, of course, optional.
+3. support for the blksize option (RFC 2348).
+   Allows packets larger than the usual 512 bytes, and is _somewhat_
+   more efficient (especially on a directly connected network).
+4. support for the timeout option (RFC 2349)
+   No support for the tsize option of RFC 2349 now.
+
+

@@ -1,0 +1,48 @@
+#! /bin/sh
+
+test -f check..sccs || exit 77
+
+if test "x$SCCS_CLEAN" = x  -a "x$SCCS_UNGET" = x ; then exit 77 ; fi
+. $srcdir/check_lib
+check_start 25 "put (WRQ) checking lock handling if checking in identical SCCS file"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write($CHECKDIR)
+default:sccs-get($SCCS_GET)sccs-delta($SCCS_DELTA)sccs-clean($SCCS_CLEAN)sccs-unget($SCCS_UNGET)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+cd $CHECKDIR/s
+cp $wd/Makefile ./MF
+sccs_create MF
+cd $wd
+do_test OK    ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/MF    Makefile
+do_test OK    ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/MF    config.log
+if test "x$last_test_ok" = "x0" ; then
+	check_end
+fi
+if test -f $CHECKDIR/s/MF 2>/dev/null ; then
+	fail_after  "file still exists, has not been checked in"
+	check_end
+fi
+if test -f $CHECKDIR/s/SCCS/p.MF 2>/dev/null ; then
+	fail_after  "lockfile exists, something is very wrong"
+	check_end
+fi
+cd $CHECKDIR/s
+# a new checkin would create a new revision 1.2
+$SCCS_GET -s -r1.2 SCCS/s.MF
+cd $wd
+if test -f $CHECKDIR/s/MF ; then 
+	:
+else
+	fail_after "could not checkout revision 1.2"
+	check_end
+fi
+out=`cmp config.log $CHECKDIR/s/MF 2>&1`
+if test $? -ne 0 ; then
+	fail_after "didn't find the expected file in repository: $out"
+fi
+check_end

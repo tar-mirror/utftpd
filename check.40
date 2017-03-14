@@ -1,0 +1,32 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 40 "write access rights checking, no config file" NOCONFIG -t $CHECKDIR/s/124 $CHECKDIR/s/127/
+
+echo 123 >$CHECKDIR/s/123     ; chmod 666 $CHECKDIR/s/123
+mkdir     $CHECKDIR/s/124     
+echo 124 >$CHECKDIR/s/124/124 ; chmod 666 $CHECKDIR/s/124/124
+mkdir     $CHECKDIR/s/124/125 
+echo 126 >$CHECKDIR/s/124/126 ; chmod 660 $CHECKDIR/s/124/126
+mkdir     $CHECKDIR/s/127/
+echo 127 >$CHECKDIR/s/127/127 ; chmod 666 $CHECKDIR/s/127/127
+touch $CHECKDIR/128 ; chmod 666 $CHECKDIR/128
+
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/123     Makefile  # should not work: not allowed
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124     Makefile  # should not work: is a directory
+do_test OK   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/124 Makefile  # should work: allowed access to s/124
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/../123 Makefile  # should not work: /../
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/125 Makefile  # should not work: is a directory
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/126 Makefile  # should not work: not writeable
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/127/127 Makefile  # should not work: "127/" on cmdline.
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/128     Makefile  # should not work: outside area
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT 124 Makefile  # should not work: rel. filename denies WRQ.
+check_restart 40 "write access rights checking, no config file, special case /" NOCONFIG /
+do_test OK   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/124 Makefile  # should work: allowed access to s/124
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124     Makefile  # should not work: is a directory
+do_test OK   ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/127/127 Makefile  # should work this time.
+check_restart 40 "write access rights checking, no config file, no dirs" NOCONFIG
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124/124 Makefile  
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/124     Makefile  
+do_test FAIL ./utftp --put 127.0.0.1:$CHECKPORT $CHECKDIR/s/127/127 Makefile  
+check_end

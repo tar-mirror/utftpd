@@ -1,0 +1,65 @@
+This is the file USAGE for GNU utftpd, a replacement for the UNIX tftpd.
+This file will be deleted if i'm happy with the main documentation.
+
+utftpd may be used as a replacement for the GNU inetutils tftpd. If
+you use it like this it will offer you a number of new features. See
+the manual page for details. The remainder of this file is uninteresting
+for you, it describes an incompatible way of configuration.
+
+To make full use of utftpd you have to use a configuration file. See
+the utftpd.conf manual page for details.
+
+Short usage instructions:
+=========================
+
+Put something like this:
+    utftpd -c /etc/utftpd.cdb -C /tftp -u rightless_user 
+into your internet services configuration file (typically
+/etc/inetd.conf), where
+- 	/etc/utftpd.cdb 
+    is a configuration file created by utftpd_make
+-   /tftp
+    is the tftp area the daemon will chroot to (yes, _do_ that.
+	TFTP has no security).
+-   rightless_user is some user which may read or write to
+    files in the tftp area, but has no other rights. utftpd
+	will change to that user just after it did the chroot().
+A full line in the configuration file may look like this:
+  tftp dgram udp wait root /usr/local/sbin/utftpd \
+    utftpd -c /etc/utftpd.cdb -C /tftp -u rightless_user 
+(all one one line).
+Comment out any other tftp line. kill -HUP inetd. 
+
+Please be aware that utftpd has be run as root if and only if it
+- shall chroot, 
+- shall change user id, or
+- shall group id.
+Otherwise there is no need to let it runs as root, you can tell 
+inetd to start is under some other user id.
+
+Note that you do not need tcpd for utftpd if it has a configuration
+file. The configuration file _is_ access control.
+
+Sample configuration file:
+	# note that all paths a relative to the /tftp root!
+	# where to find the SCCS tools get and delta (optionally
+	# clean or admin. Delete those you don't have), and the
+	# RCS tools co and ci.
+	# They are used for the version control stuff. Comment out
+	# to disable completely, delete parts you don't have.
+	# If you don't have SCCS or RCS directories that kind of
+	# version control is disables anyway.
+	default:sccs-get(/bin/get) sccs-delta(/bin/delta) \
+	  sccs-clean(/bin/clean) sccs-admin(/bin/admin) \
+	  rcs-ci(/bin/ci) rcs-co(/bin/co)
+	# 10.101.2.0/28 may read,write,create in /uwe
+	10.101.2.0/28:read,write,create( /uwe )
+	# one of our ciscos
+	10.101.2.221:read,write,create(/images:/config)
+	# customer machine, co-maintained by us.
+	10.101.2.252:write(/config/customer) read(/config/customer:/images)
+
+copy that to /etc/utftpd.conf and do
+	utftpd_make /etc/utftpd.cdb /etc/utftpd.tmp /etc/utftpd.conf
+to compile it into the form utftpd likes.
+

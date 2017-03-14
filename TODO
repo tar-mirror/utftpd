@@ -1,0 +1,7 @@
+possibly a lot, but at least:
+- clobber/noclobber TFTP options.
+  "hey, i do not want to overwrite an existing file".
+  Maybe together with an option "overwrite but backup / VC".
+- tsize option
+- "send me revision x" option (low priority) [done]
+- "save as revision x" option (low priority) [done, considered useless]

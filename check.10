@@ -1,0 +1,24 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 10 "put (WRQ) checking without conversion"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write,create($CHECKDIR/s/)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for i in $ALL_FILES ; do
+	if test -f $i ; then
+		do_test OK   ./utftp --put --timeout 17 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i $i
+		out=`cmp $wd/$i $CHECKDIR/s/$i`
+		if test $? = 0 ; then
+			:
+		else
+			fail_after  "$out"
+		fi
+	fi
+done
+check_end

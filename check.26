@@ -1,0 +1,30 @@
+#! /bin/sh
+
+test -f check..rcs || exit 77
+. $srcdir/check_lib
+check_start 26 "get (RRQ) of a checked in RCS file"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:read($CHECKDIR)
+default:rcs-ci($RCS_CI)rcs-co($RCS_CO)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+for i in `cat check..rcs_few_files` ; do
+	cd $CHECKDIR/s
+	cp $wd/$i ./$i
+	$RCS_CI -mtest -q $i </dev/null
+	cd $wd
+	do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/$i     $CHECKDIR/c/$i
+	if test -f $CHECKDIR/s/RCS/$i,v ; then
+		out=`cmp $i $CHECKDIR/c/$i`
+		if test $? -ne 0 ; then
+			fail_after  "$out"
+		fi
+	else
+		fail_after  "RCS file $CHECKDIR/s/RCS/$i,v does not exist"
+	fi
+done
+check_end

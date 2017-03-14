@@ -1,0 +1,29 @@
+#! /bin/sh
+
+. $srcdir/check_lib
+check_start 41 "extended configuration file parser checking"
+
+# setup configuration file
+cat >$CHECKDIR/check.conf <<EOF
+class test1 {
+	read=$CHECKDIR/x/
+}
+class test2:test1 {
+	read+=":$CHECKDIR/\${replaceme}/"
+}
+client 127.0.0.1/28:test2 { replaceme=s; read+=":const"}
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+echo 1 >$CHECKDIR/s/1
+mkdir   $CHECKDIR/s/2
+echo 3 >$CHECKDIR/s/2/3
+echo 4 >$CHECKDIR/s/4
+mkdir     $CHECKDIR/t
+echo 5 >$CHECKDIR/t/5
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/1       $CHECKDIR/c/1  # should work: allowed access to s/
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/2       $CHECKDIR/c/2  # should not work: is a directory
+do_test OK   ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/s/2/3     $CHECKDIR/c/3  # should work: allowed access to s/
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/x/4       $CHECKDIR/c/4  # should not work: no such file or dir.
+do_test FAIL ./utftp --get 127.0.0.1:$CHECKPORT $CHECKDIR/t/5       $CHECKDIR/c/5  # should not work: access denied
+
+check_end

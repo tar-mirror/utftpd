@@ -1,0 +1,30 @@
+#! /bin/sh
+
+if test "x$SCCS_DELTA" = x -o "x$SCCS_GET" = x ; then exit 77 ; fi
+. $srcdir/check_lib
+check_start 44 "put (WRQ), stopped transfer, SCCS unget?"
+
+# setup configuration file
+wd=`pwd`
+cat >$CHECKDIR/check.conf <<EOF
+127.0.0.1:write,read($CHECKDIR)
+default:sccs-get($SCCS_GET)sccs-delta($SCCS_DELTA)sccs-clean($SCCS_CLEAN)sccs-unget($SCCS_UNGET)
+EOF
+./utftpd_make <$CHECKDIR/check.conf $CHECKDIR/check.cdb $CHECKDIR/check.tmp
+
+cd $CHECKDIR/s
+echo 1vers1 >check1.txt
+sccs_create  check1.txt
+
+cd $wd
+# no such revision
+cp $srcdir/utftpd.c $CHECKDIR/c/check1.txt
+# OK: --stop exactly does that ...
+do_test OK  ./utftp --put --timeout 1 --stop 127.0.0.1:$CHECKPORT $CHECKDIR/s/check1.txt $CHECKDIR/c/check1.txt
+
+sleep 3 # too bad, but that's needed.
+
+if test -f $CHECKDIR/s/SCCS/p.check1.txt ; then
+	fail_after "SCCS lockfile still exists"
+fi
+check_end
